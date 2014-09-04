@@ -1,0 +1,30 @@
+#!/usr/bin/env node
+var debug = require('debug')('project-watermetre');
+var app = require('../app');
+var fs = require('fs');
+var http = require('http');
+var https = require('https');
+var url = require('url');
+var privateKey = fs.readFileSync('ssl_decrypted.key', 'utf8');
+var certificate = fs.readFileSync('ssl.crt', 'utf8');
+
+app.set('port', process.env.PORT || 3000);
+
+/* var server = app.listen(app.get('port'), function() {
+  debug('Express server listening on port ' + server.address().port);
+}); */
+
+var cred = {key: privateKey, cert: certificate};
+
+var httpsServer = https.createServer(cred, app);
+httpsServer.listen(3443);
+
+var redirect = http.createServer(function(req, res) {
+	var path = url.parse(req.url).path;
+	res.writeHead(302, {
+		'location': 'https://www.watermetre.net' + path,
+	});
+	res.end();
+});
+redirect.listen(app.get('port'));
+
