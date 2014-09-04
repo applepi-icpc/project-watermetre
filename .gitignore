@@ -1,2 +1,5 @@
 bluecore/
+ssl*
+*.log
+.DS_Store
 
