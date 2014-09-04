@@ -2,4 +2,5 @@ bluecore/
 ssl*
 *.log
 .DS_Store
+settings.js
 
