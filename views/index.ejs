@@ -1,11 +1,167 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <title><%= title %></title>
-    <link rel='stylesheet' href='/stylesheets/style.css' />
-  </head>
-  <body>
-    <h1><%= title %></h1>
-    <p>Welcome to <%= title %></p>
-  </body>
+	<head>
+		<meta charset='utf-8'>
+		<title>Bluecore</title>
+		<link href="/css/main.css" media="all" rel="stylesheet" type="text/css" />
+		<link href="/css/palette.css" media="all" rel="stylesheet" type="text/css" />
+		<link href="/css/nanoscroller.css" media="all" rel="stylesheet" type="text/css" />
+
+		<% if (!username) { %>
+			<!-- Not logged in -->
+			<link href="css/notLogged.css" media="all" rel="stylesheet" type="text/css" />
+		<% } %>
+	</head>
+	<body>
+	<div id="halo"></div>
+		<div id="main-content" class="nano"><div class="nano-content">
+			<div id="login">
+				<form name="login">
+					<span class="row"><input type="text" name="user_id" placeholder="User ID"/></span>
+					<span class="row"><input type="password" name="password" placeholder="Password" /></span>
+				</form>
+				<a href="#" class="myButton" id="logger">Login</a>
+			</div>
+			<div id="main">
+				<h1>BLUE<span>CORE</span></h1>
+				<div id="magnolia">Welcome, user with ID <em>edge</em>. Click <a href="#" id="logout">here</a> to log out.</div>
+
+				<div id="dashboard">
+					<div id="dashhalo"></div>
+					<div id="dashhaloRpt"></div>
+					<h2>Dashboard</h2>
+					<div class="board">
+						<div class="block" id="alert">
+						A very long error message but easy to see in real enviornment for there may be a lot of weird conditions that nobody can predict.
+						</div>
+						<div id="taskCommand">
+							<div class="command new superuser" id="cmdNewTask">New Task</div>
+							<div class="command start" id="cmdStartAll">Start All</div>
+							<div class="command restart" id="cmdRestartAll">Restart All</div>
+							<div class="command pause" id="cmdSuspendAll">Suspend All</div>
+							<div class="command remove" id="cmdRemoveAll">Remove All</div>
+						</div>
+						<div id="newCommand">
+							<div class="command new" id="cmdOK">OK</div>
+							<div class="command remove" id="cmdCancelNewTask">Cancel</div>
+							<div class="block">
+								Selected items
+								<span id="blkSelectedItem">0</span>
+							</div>
+							<div class="command other" id="cmdDeselect">Deselect All</div>
+						</div>
+						<div class="block">
+							Milliseconds after retrying
+							<span id="blkRetryTime">5000</span>
+						</div>
+						<div class="command other superuser" id="cmdSetRetry">Set retrying interval</div>
+						<div class="block smalltext">
+							Captcha identifying accuracy
+							<span id="blkAccuracy">90.2%</span>
+						</div>
+						<div class="block">
+							Total identified
+							<span id="blkIdentified">4.2K</span>
+						</div>
+						<div class="command other superuser" id="cmdResetStat">Reset statistics</div>
+					</div>
+				</div>
+
+				<div id="tasks">
+					<h2>Tasks</h2>
+					<div class="board">
+						<!-- #task-template 模板 -->
+						<script type="text/template" id="task-template">
+							<div class="halo">
+								<div class="commandBar">
+									{{ if (status == "paused") { }}<div class="command start">.start(<span></span>)</div>{{ } }}
+									{{ if (status != "succeeded") { }}<div class="command restart">.restart(<span></span>)</div>{{ } }}
+									{{ if (status == "running") { }}<div class="command pause">.suspend(<span></span>)</div>{{ } }}
+									<div class="command remove">.remove(<span> </span>)</div>
+								</div>
+							</div>
+							<div class="content">
+								user_id: <span class="string">{{= user_id }}</span>,<br />
+								status: <span class="string">{{= status }}</span>,<br />
+								attempts: <span class="integer">{{= attempts }}</span>,<br />
+								errors: <span class="integer">{{= errors }}</span>,<br />
+								last_error: {{ if (last_error) { }}
+									<span class="string">{{= last_error }}</span>,
+								{{ } else { }}<span class="keyword">null</span>,{{ } }}<br />
+								classes: [ <span class="string chn">{{= classes[0] }}</span>{{ if (classes.length >= 2) { }}, <span class="string chn">{{= classes[1] }}</span>{{ } }}{{ if (classes.length > 2) { }}, ...{{ } }}
+								]
+							</div>
+						</script>
+					</div>
+				</div>
+				<div id="newtask">
+					<h2>New Task</h2>
+					<div class="board">
+						<form name="login">
+							<span class="row"><input type="text" name="user_id" placeholder="User ID"/></span>
+							<span class="row"><input type="password" name="password" placeholder="Password" /></span>
+						</form>
+						<a href="#" class="myButton" id="inquiry">Inquiry</a>
+						<span class="loading">Retrieving data...</span>
+						<div id="classList">
+							<!-- #class-title-template 模板 -->
+							<script type="text/template" id="class-title-template">
+								<h3>
+									<span class="chn">{{= title }}</span>
+									<span class="selectIndicator">[ Selected <span class="selectCount">0</span> ]</span>
+									<span class="selectAll"><div class="command new">Select All</div></span>
+								</h3>
+								<div class="classContainer"></div>
+							</script>
+							<!-- #class-template 模板 -->
+							<script type="text/template" id="class-template">
+								<div class="halo">
+									<div class="commandBar">
+										<div class="command new select">.select(<span> </span>)</div>
+										<div class="command remove deSelect">.deSelect(<span> </span>)</div>
+									</div>
+								</div>
+								<div class="content">
+									teacher: <span class="string chn">{{= teacher }}</span>,<br />
+									message: <span class="string chn special-message">{{= message }}</span>
+								</div>
+							</script>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div></div>
+
+		<!-- Library -->
+		<script type="text/javascript" src="/scripts/libs/jquery.js"></script>
+		<script type="text/javascript" src="/scripts/libs/underscore.js"></script>
+		<script type="text/javascript" src="/scripts/libs/backbone.js"></script>
+		<script type="text/javascript" src="/scripts/libs/jquery.nanoscroller.js"></script>
+
+		<!-- Settings -->
+		<script type="text/javascript">
+			_.templateSettings = {
+				interpolate: /\{\{=(.+?)\}\}/g,
+				escape: /\{\{-(.+?)\}\}/g,
+				evaluate: /\{\{(.+?)\}\}/g
+			};
+		</script>
+
+		<!-- Models -->
+		<script type="text/javascript" src="/scripts/models/task.js"></script>
+		<script type="text/javascript" src="/scripts/models/class.js"></script>
+
+		<!-- Views -->
+		<script type="text/javascript" src="/scripts/views/taskView.js"></script>
+		<script type="text/javascript" src="/scripts/views/classView.js"></script>
+
+		<!-- Perform Effect -->
+		<script type="text/javascript" src="/scripts/effects/loggingEffects.js"></script>
+
+		<!-- Main -->
+		<script type="text/javascript" src="/scripts/main.js"></script>
+
+		<!-- Development: false data -->
+		<script type="text/javascript" src="/falsedata.js"></script>
+	</body>
 </html>

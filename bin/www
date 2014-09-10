@@ -8,6 +8,9 @@ var url = require('url');
 var privateKey = fs.readFileSync('ssl_decrypted.key', 'utf8');
 var certificate = fs.readFileSync('ssl.crt', 'utf8');
 
+var Task = require('../models/task.js');
+var Db = require('../models/db.js');
+
 app.set('port', process.env.PORT || 3000);
 
 /* var server = app.listen(app.get('port'), function() {
@@ -16,15 +19,29 @@ app.set('port', process.env.PORT || 3000);
 
 var cred = {key: privateKey, cert: certificate};
 
-var httpsServer = https.createServer(cred, app);
-httpsServer.listen(3443);
+Db.initialize(function (err) {
+	if (!err) {
+		console.log('MongoDB connected.')
+		Task.initialize(function (err) {
+			if (!err) {
+				console.log("Initialized workers successfully.");
+				var httpsServer = https.createServer(cred, app);
+				httpsServer.listen(3443);
 
-var redirect = http.createServer(function(req, res) {
-	var path = url.parse(req.url).path;
-	res.writeHead(302, {
-		'location': 'https://www.watermetre.net' + path,
-	});
-	res.end();
+				var redirect = http.createServer(function(req, res) {
+					var path = url.parse(req.url).path;
+					res.writeHead(302, {
+						'location': 'https://www.watermetre.net' + path,
+					});
+					res.end();
+				});
+				redirect.listen(app.get('port'));
+			} else {
+				console.log("Failed to initialize workers: ");
+			}
+		});
+	} else {
+		console.log('Failed to open MongoDB connection.');
+	}
 });
-redirect.listen(app.get('port'));
 

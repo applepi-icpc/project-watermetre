@@ -1,0 +1,19 @@
+h1 {
+	left: 363px;
+}
+
+#magnolia {
+	display: none;
+}
+
+#dashboard {
+	display: none;
+}
+
+#tasks {
+	display: none;
+}
+
+#login {
+	display: block;
+}

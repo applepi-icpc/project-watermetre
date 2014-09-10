@@ -7,10 +7,12 @@ var mongodb = new Db(settings.db, new Server(settings.host, Connection.DEFAULT_P
 
 module.exports = mongodb;
 
-mongodb.open(function(err, db) {
-	if (err) {
-		console.log('Failed to open MongoDB connection.');
-		throw err;
-	}
-	console.log('MongoDB connected.');
-});
+mongodb.initialize = function (callback) {
+	this.open(function(err, db) {
+		if (err) {
+			return callback(err);
+		} else {
+			return callback();
+		}
+	});
+};

@@ -1,0 +1,74 @@
+body {
+	color: #177ee6;
+	background-color: black;
+}
+#magnolia {
+	color: white;
+}
+#magnolia a:link {
+	color: #03b2d5;
+}
+#magnolia a:visited {
+	color: #03b2d5;
+}
+#magnolia a:focus {
+	color: #b2f2ff;
+}
+#magnolia a:hover {
+	color: #b2f2ff;
+}
+#magnolia a:active {
+	color: #b2f2ff;
+}
+#dashboard {
+	color: #03b2d5;
+}
+#dashboard h2 {
+	border-bottom: 1px solid #03b2d5;
+}
+#dashboard div.board div.block {
+	border: 1px solid #03b2d5;
+}
+div.command {
+	color: #03b2d5;
+}
+div.command:hover {
+	color: #b2f2ff;
+}
+#alert:hover {
+	background-color: #03b2d5;
+	color: black;
+}
+div.task.succeeded {
+	color: #17e6bf;
+}
+div.class.selected {
+	color: #17e6bf;
+}
+div.classTitle h3:hover {
+	background-color: #0a2c56;
+}
+div.classTitle h3 span.selectAll {
+	color: #03b2d5;
+}
+div.classTitle span.selectIndicator {
+	color: #03b2d5;
+}
+span.string {
+	color: #f6efcb;
+}
+span.integer {
+	color: #f5e07a;
+}
+span.keyword {
+	color: #03b2d5;
+}
+
+#login {
+	color: white;
+}
+input[type=text], input[type=password] {
+	border-bottom: 1px dashed white;
+	color: white;
+}
+
