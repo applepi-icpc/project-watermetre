@@ -1,4 +1,5 @@
 var express = require('express');
+var expressSession = require('express-session');
 var path = require('path');
 var favicon = require('static-favicon');
 var logger = require('morgan');
@@ -10,6 +11,8 @@ var users = require('./routes/users');
 var tasks = require('./routes/tasks');
 
 var app = express();
+var settings = require('./settings');
+var MongoStore = require('connect-mongo')(expressSession);
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
@@ -21,6 +24,15 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded());
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
+app.use(expressSession({
+    secret: settings.cookieSecret,
+    store: new MongoStore({
+        db: settings.db,
+        host: settings.host
+    }),
+    saveUninitialized: true,
+    resave: true
+}));
 
 app.use('/', routes);
 app.use('/users', users);

@@ -162,14 +162,12 @@ div.command span {
 	text-align: left !important;
 	padding: 10px 10px !important;
 	line-height: 20px;
+	cursor: pointer;
 
 	transition: all 300ms;
 	-moz-transition: all 300ms;
 	-webkit-transition: all 300ms; 
 	-o-transition: all 300ms; 
-}
-#alert:hover {
-	cursor: pointer;
 }
 
 #tasks, #newtask {
@@ -335,6 +333,12 @@ span.special-message {
 	text-align: center;
 }
 
+#loginMessage {
+	margin-top: 15px;
+	font-size: 14px;
+	color: #cccccc;
+}
+
 form span.row {
 	display: block;
 	margin: 10px 0;
@@ -394,9 +398,11 @@ input:focus {
 	top:1px;
 }
 
-span.loading {
-	display: none;
-	margin-left: 5px;
+.loading {
 	padding-left: 22px;
 	background: url(../images/loading.gif) no-repeat center left;
+}
+#newtask span.loading {
+	display: none;
+	margin-left: 5px;
 }

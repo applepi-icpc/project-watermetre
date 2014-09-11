@@ -26,6 +26,8 @@ User.login = function login(username, password, callback) {
 			if (err) {
 				if (err == '密码错误') {
 					return callback('Wrong password.', 403);
+				} else if (err == '用户名错误') {
+					return callback('Wrong user ID.', 403);
 				} else {
 					return callback(err, 500);
 				}

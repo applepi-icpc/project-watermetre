@@ -35,7 +35,7 @@ div.command {
 div.command:hover {
 	color: #b2f2ff;
 }
-#alert:hover {
+#alert:hover, #alert.flash {
 	background-color: #03b2d5;
 	color: black;
 }

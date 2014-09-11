@@ -21,10 +21,11 @@
 					<span class="row"><input type="password" name="password" placeholder="Password" /></span>
 				</form>
 				<a href="#" class="myButton" id="logger">Login</a>
+				<div id="loginMessage"><span></span></div>
 			</div>
 			<div id="main">
 				<h1>BLUE<span>CORE</span></h1>
-				<div id="magnolia">Welcome, user with ID <em>edge</em>. Click <a href="#" id="logout">here</a> to log out.</div>
+				<div id="magnolia">Welcome, user with ID <em><% if (username) { %><%= username %><% } %></em>. Click <a href="#" id="logout">here</a> to log out.</div>
 
 				<div id="dashboard">
 					<div id="dashhalo"></div>
@@ -145,6 +146,11 @@
 				escape: /\{\{-(.+?)\}\}/g,
 				evaluate: /\{\{(.+?)\}\}/g
 			};
+
+			// Startup codes
+			<% if (username && username != 'edge') { %>
+				$('div.superuser').hide();
+			<% } %>
 		</script>
 
 		<!-- Models -->
@@ -154,11 +160,13 @@
 		<!-- Views -->
 		<script type="text/javascript" src="/scripts/views/taskView.js"></script>
 		<script type="text/javascript" src="/scripts/views/classView.js"></script>
+		<script type="text/javascript" src="/scripts/views/alert.js"></script>
 
 		<!-- Perform Effect -->
 		<script type="text/javascript" src="/scripts/effects/loggingEffects.js"></script>
 
-		<!-- Main -->
+		<!-- Others -->
+		<script type="text/javascript" src="/scripts/login.js"></script>
 		<script type="text/javascript" src="/scripts/main.js"></script>
 
 		<!-- Development: false data -->

@@ -6,7 +6,7 @@ var User = require('../models/user.js');
 router.checkLoggedIn = function checkLoggedIn (req, res, next) {
 	if (!req.session || !req.session.user) {
 		res.status(403);
-		return res.json({err: 'Not logged in.'});
+		return res.json({error: 'Not logged in.'});
 	} else {
 		next();
 	}
@@ -14,7 +14,7 @@ router.checkLoggedIn = function checkLoggedIn (req, res, next) {
 router.checkNotLoggedIn = function checkNotLoggedIn (req, res, next) {
 	if (req.session && req.session.user) {
 		res.status(403);
-		return res.json({err: 'Already logged in.'});
+		return res.json({error: 'Already logged in.'});
 	} else {
 		next();
 	}
@@ -22,13 +22,13 @@ router.checkNotLoggedIn = function checkNotLoggedIn (req, res, next) {
 router.checkSuperuser = function checkSuperuser (req, res, next) {
 	if (!req.session || !req.session.user) {
 		res.status(403);
-		return res.json({err: 'Not logged in.'});
+		return res.json({error: 'Not logged in.'});
 	} else if (req.session.user) {
 		if (req.session.user.id == 'edge') {
 			next();
 		} else {
 			res.status(403);
-			return res.json({err: 'Access denied.'});
+			return res.json({error: 'Access denied.'});
 		}
 	}
 };
@@ -38,7 +38,7 @@ router.post('/login', function (req, res) {
 	User.login(req.body.username, req.body.password, function (err, statusCode, user) {
 		res.status(statusCode);
 		if (err) {
-			res.json({err: err});
+			res.json({error: err});
 		} else {
 			req.session.user = user;
 			return res.json(user);

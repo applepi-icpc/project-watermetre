@@ -3,11 +3,6 @@ var app = app || {};
 var animationDuration = 500;
 
 $(function () {
-	$('.nano').nanoScroller({ preventPageScrolling: true, alwaysVisible: true });
-
-	$('#logger').click(app.loginEffect);
-	$('#logout').click(app.logoutEffect);
-
 	$('#newCommand').hide();
 
 	$('#cmdNewTask').click(function() {
@@ -42,4 +37,6 @@ $(function () {
 		$('div.class.selected').removeClass('selected');
 		app.classView.triggerSelectedChange();
 	});
+
+	$('.nano').nanoScroller({ preventPageScrolling: true, alwaysVisible: true });
 });
