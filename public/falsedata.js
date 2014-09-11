@@ -1,35 +1,6 @@
 var app = app || {};
 
 $(function () {
-	app.tasks.reset([
-		{
-			_id: '123456',
-			user_id: '1200012716',
-			status: 'running',
-			attempts: 1721,
-			errors: 15,
-			last_error: 'Request timeout',
-			classes: ['实用英语词汇学', '实用英语词汇学', '实用英语词汇学']
-		},
-		{
-			_id: '123457',
-			user_id: '1200012787',
-			status: 'paused',
-			attempts: 522,
-			errors: 3,
-			last_error: 'Request timeout',
-			classes: ['高尔夫球', '高尔夫球']
-		},
-		{
-			_id: '12345e',
-			user_id: '1200012747',
-			status: 'succeeded',
-			attempts: 1320,
-			errors: 0,
-			last_error: null,
-			classes: ['实用英语词汇学']
-		}
-	]);
 	$('#inquiry').click(function() {
 		app.classes.reset([
 			{

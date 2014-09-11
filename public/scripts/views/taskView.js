@@ -8,7 +8,12 @@ var TaskView = Backbone.View.extend({
 	className: 'task',
 	template: _.template($('#task-template').html()),
 
-	events: {},
+	events: {
+		'click div.command.start': 'start',
+		'click div.command.pause': 'suspend',
+		'click div.command.restart': 'restart',
+		'click div.command.remove': 'removeFromServer'
+	},
 
 	initialize: function (option) {
 		this.task = option.task;
@@ -20,9 +25,9 @@ var TaskView = Backbone.View.extend({
 		this.$el.html(this.template({
 			user_id: task.get('user_id'),
 			status: task.get('status'),
-			attempts: task.get('attempts'),
-			errors: task.get('errors'),
-			last_error: task.get('last_error'),
+			attempts: task.get('stat').attempts,
+			errors: task.get('stat').errors,
+			last_error: task.get('stat').last_error,
 			classes: task.get('classes')
 		}));
 		if (task.get('status') == 'succeeded') {
@@ -43,7 +48,9 @@ var TaskView = Backbone.View.extend({
 		this.$el.animate({
 			opacity: '1',
 			height: rowHeight
-		}, animationDuration);
+		}, animationDuration, function () {
+			$('.nano').nanoScroller();
+		});
 		return this;
 	},
 
@@ -54,8 +61,22 @@ var TaskView = Backbone.View.extend({
 			height: '0'
 		}, animationDuration, function () {
 			$el.remove();
+			$('.nano').nanoScroller();
 		});
 		return this;
+	},
+
+	start: function () {
+		this.task.start();
+	},
+	suspend: function () {
+		this.task.suspend();
+	},
+	restart: function () {
+		this.task.restart();
+	},
+	removeFromServer: function () {
+		this.task.removeFromServer();
 	}
 });
 
@@ -66,6 +87,7 @@ var TaskListView = Backbone.View.extend({
 		this.collection = option.collection;
 		this.listenTo(this.collection, 'add', this.addOne);
 		this.listenTo(this.collection, 'remove', this.removeOne);
+		this.listenTo(this.collection, 'destroy', this.removeOne);
 		this.listenTo(this.collection, 'reset', this.refresh);
 	},
 
@@ -75,8 +97,10 @@ var TaskListView = Backbone.View.extend({
 			var newTask = new TaskView({ task: model });
 			this.subViews[id] = newTask;
 			newTask.render();
+			this.$('span.taskIdentifier').hide();
 			if (typeof option == 'object' && option.noAnimate) {
 				this.$el.append(newTask.$el);
+				$('.nano').nanoScroller();
 			}
 			else {
 				newTask.fadeIn(this.$el);
@@ -90,6 +114,10 @@ var TaskListView = Backbone.View.extend({
 			var delTask = this.subViews[id];
 			this.subViews[id] = undefined;
 			delTask.fadeOut();
+			delTask.remove();
+		}
+		if (this.collection.size() == 0) {
+			this.$('span.taskIdentifier').show();
 		}
 	},
 
@@ -98,6 +126,9 @@ var TaskListView = Backbone.View.extend({
 			subView.remove();
 		});
 		this.subViews = {};
+		if (this.collection.size() == 0) {
+			this.$('span.taskIdentifier').show();
+		}
 		this.collection.each(function (model) {
 			this.addOne(model, this, { noAnimate: true });
 		}, this);

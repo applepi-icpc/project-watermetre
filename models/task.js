@@ -1,6 +1,7 @@
 var db = require('./db.js');
 var ObjectId = require('mongodb').ObjectId;
 var Worker = require('./worker.js');
+var ObjectId = require('mongodb').ObjectID;
 var _ = require('underscore');
 
 var statHash = {};
@@ -24,8 +25,8 @@ function Task(task) {
 			seq: element.seq,
 			className: element.className
 		};
-		classes.push(newClass);
-	});
+		this.classes.push(newClass);
+	}, this);
 };
 module.exports = Task;
 
@@ -47,7 +48,7 @@ Task.prototype.getStatus = function getStatus () {
 	} else {
 		return undefined;
 	}
-}
+};
 Task.prototype.ensureStat = function ensureStat () {
 	if (this._id) {
 		if (!statHash[this._id]) {
@@ -122,41 +123,54 @@ Task.prototype.createWorkers = function createWorkers() {
 // Synchronous functions.
 // Returns an error, or null indicating operated successfully.
 
+// For now, no error will be returned...
+
 Task.prototype.suspend = function suspend() {
-	try {
-		if (workerHash[this._id]) {
-			_.each(workerHash[this._id], function (worker) {
-				worker.stop();
-			});
-		}
-	} catch(err) {
-		return err;
+	if (this.getStatus() == 'succeeded') {
+		return "Task has already ended successfully."
+	} else if (workerHash[this._id]) {
+		_.each(workerHash[this._id], function (worker) {
+			worker.stop();
+		});
+		this.changeStatus('paused');
 	}
-	this.changeStatus('paused');
+};
+Task.prototype.succeed = function suspend() {
+	if (workerHash[this._id]) {
+		_.each(workerHash[this._id], function (worker) {
+			worker.stop();
+		});
+		this.changeStatus('succeeded');
+	}
 };
 Task.prototype.start = function start() {
-	try {
-		if (workerHash[this._id]) {
-			_.each(workerHash[this._id], function (worker) {
+	if (this.getStatus() == 'succeeded') {
+		return "Task has already ended successfully."
+	} else if (workerHash[this._id]) {
+		_.each(workerHash[this._id], function (worker, index) {
+			// Workers are started in turn, delayed by an interval.
+			_.delay(function () {
 				worker.start();
-			});
-		}
-	} catch(err) {
-		return err;
+			}, index * 500);
+		});
+		this.changeStatus('running');
 	}
-	this.changeStatus('running');
 };
 
 Task.prototype.restart = function restart() {
-	var self = this;
-	var err = self.suspend();
-	if (err) return err;
+	if (this.getStatus() == 'succeeded') {
+		return "Task has already ended successfully."
+	} else {
+		var self = this;
+		var err = self.suspend();
+		if (err) return err;
 
-	self.resetStat();
+		self.resetStat();
 
-	err = self.start();
-	if (err) return err;
-	else return null;
+		err = self.start();
+		if (err) return err;
+		else return null;
+	}
 };
 
 Task.prototype.remove = function remove(callback) {
@@ -168,6 +182,7 @@ Task.prototype.remove = function remove(callback) {
 			}
 			collection.remove({ _id: ObjectId.createFromHexString(self._id)}, function(err) {
 				if (!err) {
+					self.suspend();
 					workerHash[self._id] = undefined;
 				}
 				callback(err);
@@ -215,17 +230,23 @@ Task.getAll = function get(username, callback) {
 			if (err) {
 				return callback(err);
 			} else {
+				tasks = [];
 				cursor.toArray(function(err, docs) {
 					if (err) {
 						return callback(err);
 					} else {
 						_.each(docs, function (task) {
+							task = new Task(task);
+							task._id = task._id.toHexString();
+
 							task.ensureStat();
 							task.stat = _.clone(task.getStat());
 							task.ensureStatus();
 							task.status = _.clone(task.getStatus());
+
+							tasks.push(task);
 						});
-						return callback(null, docs);
+						return callback(null, tasks);
 					}
 				});
 			}
@@ -241,7 +262,7 @@ Task.initialize = function initialize (callback) {
 			console.log(err);
 			callback(err);
 		} else {
-			_.each(tasks, function (task) {
+			_.each(tasks, function (task, index) {
 				task.createWorkers();
 				task.start();
 			});

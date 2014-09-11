@@ -18,14 +18,17 @@ module.exports = Worker;
 
 // callback(err, ended)
 Worker.prototype.work = function work (callback) {
+	var self = this;
+
 	// TODO: Finish this core function
 
 	// Test code here.
 	self.task.ensureStat();
 	var stat = self.task.getStat();
-	if (stat.attempts == 50) {
+
+	if (stat.attempts >= 500) {
 		_.delay(callback, 1000, null, true);
-	} else if (stat.attempts == 15 || stat.attempts == 30) {
+	} else if (stat.attempts == 4 || stat.attempts == 12) {
 		_.delay(callback, 1000, "Test error.", false);
 	} else {
 		_.delay(callback, 1000, null, false);
@@ -34,6 +37,9 @@ Worker.prototype.work = function work (callback) {
 Worker.prototype.start = function start () {
 	var self = this;
 	if (!self.intervalId) {
+		// TODO: Try to login and store jsession ID.
+		// If login failed, change tasks' status to paused, and remain intervalId null.
+
 		self.intervalId = setInterval(function() {
 			self.work(function(err, ended) {
 				self.task.ensureStat();
@@ -47,8 +53,7 @@ Worker.prototype.start = function start () {
 					stat.last_error = err;
 				} 
 				if (ended) {
-					self.stop();
-					status = 'succeeded';
+					self.task.succeed();
 				}
 			});
 		}, settings.retryInterval);

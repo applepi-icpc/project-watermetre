@@ -50,7 +50,7 @@ exports.tryIdentify = function (jsessionid, callback) {
 					}
 					fs.close(fd, function () {
 						var res = bluecore.identify(filePath);
-						console.log(res);
+						// console.log(res);
 						fs.unlink(filePath, function () {
 							var reqSubmit = http.request({
 								hostname: 'elective.pku.edu.cn',
@@ -71,7 +71,7 @@ exports.tryIdentify = function (jsessionid, callback) {
 									++exports.tried;
 									if (resBody.search('<valid>2</valid>') == -1) {
 										++exports.wrong;
-										fs.open(filePathErr, 'w', function (err, fdErr) {
+										/* fs.open(filePathErr, 'w', function (err, fdErr) {
 											if (!err) {
 												fs.write(fdErr, raw, 0, lenRaw, null, function (err) {
 													if (!err) {
@@ -82,7 +82,7 @@ exports.tryIdentify = function (jsessionid, callback) {
 													}
 												});
 											}
-										});
+										}); */
 										return callback(undefined, false);
 									}
 									else {

@@ -32,9 +32,7 @@
 					<div id="dashhaloRpt"></div>
 					<h2>Dashboard</h2>
 					<div class="board">
-						<div class="block" id="alert">
-						A very long error message but easy to see in real enviornment for there may be a lot of weird conditions that nobody can predict.
-						</div>
+						<div class="block" id="alert"></div>
 						<div id="taskCommand">
 							<div class="command new superuser" id="cmdNewTask">New Task</div>
 							<div class="command start" id="cmdStartAll">Start All</div>
@@ -71,6 +69,7 @@
 				<div id="tasks">
 					<h2>Tasks</h2>
 					<div class="board">
+						<span class="taskIdentifier">No tasks avaliable.</span>
 						<!-- #task-template 模板 -->
 						<script type="text/template" id="task-template">
 							<div class="halo">
@@ -89,7 +88,7 @@
 								last_error: {{ if (last_error) { }}
 									<span class="string">{{= last_error }}</span>,
 								{{ } else { }}<span class="keyword">null</span>,{{ } }}<br />
-								classes: [ <span class="string chn">{{= classes[0] }}</span>{{ if (classes.length >= 2) { }}, <span class="string chn">{{= classes[1] }}</span>{{ } }}{{ if (classes.length > 2) { }}, ...{{ } }}
+								classes: [ <span class="string chn">{{= classes[0].className }}</span>{{ if (classes.length >= 2) { }}, <span class="string chn">{{= classes[1].className }}</span>{{ } }}{{ if (classes.length > 2) { }}, ...{{ } }}
 								]
 							</div>
 						</script>
@@ -146,11 +145,6 @@
 				escape: /\{\{-(.+?)\}\}/g,
 				evaluate: /\{\{(.+?)\}\}/g
 			};
-
-			// Startup codes
-			<% if (username && username != 'edge') { %>
-				$('div.superuser').hide();
-			<% } %>
 		</script>
 
 		<!-- Models -->
@@ -166,8 +160,20 @@
 		<script type="text/javascript" src="/scripts/effects/loggingEffects.js"></script>
 
 		<!-- Others -->
+		<script type="text/javascript" src="/scripts/loadTask.js"></script>
 		<script type="text/javascript" src="/scripts/login.js"></script>
 		<script type="text/javascript" src="/scripts/main.js"></script>
+
+		<!-- Startup -->
+		<script type="text/javascript">
+			// Startup codes
+			<% if (username && username != 'edge') { %>
+				$('div.superuser').hide();
+			<% } %>
+			<% if (username) { %>
+				$(function() { app.loadTask() });
+			<% } %>
+		</script>
 
 		<!-- Development: false data -->
 		<script type="text/javascript" src="/falsedata.js"></script>

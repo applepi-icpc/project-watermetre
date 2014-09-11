@@ -28,8 +28,7 @@ $(function() {
 						$('div.superuser').show();
 					}
 
-					// TODO: Load data
-
+					app.loadTask();
 					app.loginEffect();
 				}
 			});
@@ -41,7 +40,7 @@ $(function() {
 			type: 'POST',
 			timeout: 10000,
 			error: function (jqXHR, textStatus, err) {
-				app.alert(JSON.parse(jqXHR.responseText).error + ' (Status: ' + err + ')');
+				app.alert('Logout error: ' + JSON.parse(jqXHR.responseText).error + ' (Status: ' + err + ')');
 			},
 			success: function () {
 				$('#loginMessage span').removeClass('loading');

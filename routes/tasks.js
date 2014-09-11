@@ -3,6 +3,7 @@ var router = express.Router();
 var User = require('../models/user.js');
 var Users = require('./users.js');
 var Task = require('../models/task.js');
+var _ = require('underscore');
 
 router.checkUser = function checkUserWithTaskId (req, res, next) {
 	Task.get(req.params.taskId, function(err, task) {
@@ -87,8 +88,28 @@ router.put('/start/:taskId', function(req, res) {
 				return res.json({error: err});
 			} else {
 				res.status(201);
-				return res.json(task);
+				return res.json({});
 			}
+		}
+	});
+});
+
+router.put('/start', Users.checkLoggedIn);
+router.put('/start', function(req, res) {
+	var sessionId = req.session.user.id;
+	Task.getAll(sessionId, function(err, tasks) {
+		if (err) {
+			res.status(500);
+			return res.json({error: err});
+		} else {
+			_.each(tasks, function (task) {
+				if (task.getStatus() != 'succeeded') {
+					// Ignore all errors
+					task.start();
+				}
+			});
+			res.status(201);
+			res.json({});
 		}
 	});
 });
@@ -106,8 +127,28 @@ router.put('/suspend/:taskId', function(req, res) {
 				return res.json({error: err});
 			} else {
 				res.status(201);
-				return res.json(task);
+				return res.json({});
 			}
+		}
+	});
+});
+
+router.put('/suspend', Users.checkLoggedIn);
+router.put('/suspend', function(req, res) {
+	var sessionId = req.session.user.id;
+	Task.getAll(sessionId, function(err, tasks) {
+		if (err) {
+			res.status(500);
+			return res.json({error: err});
+		} else {
+			_.each(tasks, function (task) {
+				if (task.getStatus() != 'succeeded') {
+					// Ignore all errors
+					task.suspend();
+				}
+			});
+			res.status(201);
+			res.json({});
 		}
 	});
 });
@@ -125,8 +166,28 @@ router.put('/restart/:taskId', function(req, res) {
 				return res.json({error: err});
 			} else {
 				res.status(201);
-				return res.json(task);
+				return res.json({});
 			}
+		}
+	});
+});
+
+router.put('/restart', Users.checkLoggedIn);
+router.put('/restart', function(req, res) {
+	var sessionId = req.session.user.id;
+	Task.getAll(sessionId, function(err, tasks) {
+		if (err) {
+			res.status(500);
+			return res.json({error: err});
+		} else {
+			_.each(tasks, function (task) {
+				if (task.getStatus() != 'succeeded') {
+					// Ignore all errors
+					task.restart();
+				}
+			});
+			res.status(201);
+			res.json({});
 		}
 	});
 });
@@ -150,6 +211,24 @@ router.delete('/:taskId', function(req, res) {
 		} else {
 			res.status(204);
 			return res.json({});
+		}
+	});
+});
+
+router.delete('/', Users.checkLoggedIn);
+router.delete('/', function(req, res) {
+	var sessionId = req.session.user.id;
+	Task.getAll(sessionId, function(err, tasks) {
+		if (err) {
+			res.status(500);
+			return res.json({error: err});
+		} else {
+			_.each(tasks, function (task) {
+				// Ignore all errors
+				task.remove();
+			});
+			res.status(204);
+			res.json({});
 		}
 	});
 });
