@@ -5,7 +5,7 @@ app.loadTask = function (callback) {
 	app.tasks.fetch({
 		reset: true,
 		success: function () {
-			app.hideAlert();
+			app.hideAlert(500);
 			if (callback) callback();
 		},
 		error: function (collection, response) {

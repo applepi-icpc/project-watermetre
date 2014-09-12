@@ -1,6 +1,7 @@
 var app = app || {};
 
 var animationDuration = 500; // milliseconds
+var animationLoading = 200;
 var rowHeight = '146px';
 
 var TaskView = Backbone.View.extend({
@@ -41,8 +42,8 @@ var TaskView = Backbone.View.extend({
 
 	fadeIn: function ($list) {
 		this.$el.css({
-			opacity: '0',
-			height: '0'
+			opacity: 0,
+			height: 0
 		});
 		$list.append(this.$el);
 		this.$el.animate({
@@ -57,26 +58,30 @@ var TaskView = Backbone.View.extend({
 	fadeOut: function () {
 		var $el = this.$el;
 		$el.animate({
-			opacity: '0',
-			height: '0'
+			opacity: 0,
+			height: 0
 		}, animationDuration, function () {
-			$el.remove();
+			this.remove();
 			$('.nano').nanoScroller();
 		});
 		return this;
 	},
 
 	start: function () {
-		this.task.start();
+		this.$('div.loadingBar').fadeIn(animationLoading);
+		this.task.start(function () { this.$('div.loadingBar').fadeOut(animationLoading); });
 	},
 	suspend: function () {
-		this.task.suspend();
+		this.$('div.loadingBar').fadeIn(animationLoading);
+		this.task.suspend(function () { this.$('div.loadingBar').fadeOut(animationLoading); });
 	},
 	restart: function () {
-		this.task.restart();
+		this.$('div.loadingBar').fadeIn(animationLoading);
+		this.task.restart(function () { this.$('div.loadingBar').fadeOut(animationLoading); });
 	},
 	removeFromServer: function () {
-		this.task.removeFromServer();
+		this.$('div.loadingBar').fadeIn(animationLoading);
+		this.task.removeFromServer(function () { this.$('div.loadingBar').fadeOut(animationLoading); });
 	}
 });
 
@@ -97,7 +102,7 @@ var TaskListView = Backbone.View.extend({
 			var newTask = new TaskView({ task: model });
 			this.subViews[id] = newTask;
 			newTask.render();
-			this.$('span.taskIdentifier').hide();
+			this.$('div.taskIdentifier').hide(animationDuration);
 			if (typeof option == 'object' && option.noAnimate) {
 				this.$el.append(newTask.$el);
 				$('.nano').nanoScroller();
@@ -112,12 +117,11 @@ var TaskListView = Backbone.View.extend({
 		var id = model.get('_id');
 		if (this.subViews[id]) {
 			var delTask = this.subViews[id];
-			this.subViews[id] = undefined;
+			delete this.subViews[id];
 			delTask.fadeOut();
-			delTask.remove();
 		}
 		if (this.collection.size() == 0) {
-			this.$('span.taskIdentifier').show();
+			this.$('div.taskIdentifier').show(animationDuration);
 		}
 	},
 
@@ -127,7 +131,7 @@ var TaskListView = Backbone.View.extend({
 		});
 		this.subViews = {};
 		if (this.collection.size() == 0) {
-			this.$('span.taskIdentifier').show();
+			this.$('div.taskIdentifier').show(animationDuration);
 		}
 		this.collection.each(function (model) {
 			this.addOne(model, this, { noAnimate: true });

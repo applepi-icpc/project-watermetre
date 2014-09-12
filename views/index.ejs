@@ -32,7 +32,9 @@
 					<div id="dashhaloRpt"></div>
 					<h2>Dashboard</h2>
 					<div class="board">
-						<div class="block" id="alert"></div>
+						<div id="alertWrap">
+							<div class="block" id="alert"></div>
+						</div>
 						<div id="taskCommand">
 							<div class="command new superuser" id="cmdNewTask">New Task</div>
 							<div class="command start" id="cmdStartAll">Start All</div>
@@ -51,16 +53,20 @@
 						</div>
 						<div class="block">
 							Milliseconds after retrying
-							<span id="blkRetryTime">5000</span>
+							<span id="blkRetryTime"><%= retryInterval %></span>
+							<input type="text" id="inputRetryTime" />
 						</div>
-						<div class="command other superuser" id="cmdSetRetry">Set retrying interval</div>
+						<div class="command other superuser" id="cmdSetRetry">Set 
+						retrying interval</div>
+						<div class="command other superuser" id="cmdSetRetryConfirm">OK</div>
+						<div class="command other superuser" id="cmdSetRetryCancel">Cancel</div>
 						<div class="block smalltext">
 							Captcha identifying accuracy
-							<span id="blkAccuracy">90.2%</span>
+							<span id="blkAccuracy">N/A</span>
 						</div>
 						<div class="block">
 							Total identified
-							<span id="blkIdentified">4.2K</span>
+							<span id="blkIdentified">N/A</span>
 						</div>
 						<div class="command other superuser" id="cmdResetStat">Reset statistics</div>
 					</div>
@@ -69,11 +75,12 @@
 				<div id="tasks">
 					<h2>Tasks</h2>
 					<div class="board">
-						<span class="taskIdentifier">No tasks avaliable.</span>
+						<div class="taskIdentifier">No tasks avaliable.</div>
 						<!-- #task-template 模板 -->
 						<script type="text/template" id="task-template">
 							<div class="halo">
 								<div class="commandBar">
+									<div class="loadingBar"></div>
 									{{ if (status == "paused") { }}<div class="command start">.start(<span></span>)</div>{{ } }}
 									{{ if (status != "succeeded") { }}<div class="command restart">.restart(<span></span>)</div>{{ } }}
 									{{ if (status == "running") { }}<div class="command pause">.suspend(<span></span>)</div>{{ } }}
@@ -98,8 +105,8 @@
 					<h2>New Task</h2>
 					<div class="board">
 						<form name="login">
-							<span class="row"><input type="text" name="user_id" placeholder="User ID"/></span>
-							<span class="row"><input type="password" name="password" placeholder="Password" /></span>
+							<span class="row"><input type="text" name="query_user_id" placeholder="User ID"/></span>
+							<span class="row"><input type="password" name="query_password" placeholder="Password" /></span>
 						</form>
 						<a href="#" class="myButton" id="inquiry">Inquiry</a>
 						<span class="loading">Retrieving data...</span>
@@ -155,6 +162,7 @@
 		<script type="text/javascript" src="/scripts/views/taskView.js"></script>
 		<script type="text/javascript" src="/scripts/views/classView.js"></script>
 		<script type="text/javascript" src="/scripts/views/alert.js"></script>
+		<script type="text/javascript" src="/scripts/views/stat.js"></script>
 
 		<!-- Perform Effect -->
 		<script type="text/javascript" src="/scripts/effects/loggingEffects.js"></script>
@@ -173,6 +181,7 @@
 			<% if (username) { %>
 				$(function() { app.loadTask() });
 			<% } %>
+			$(function() { app.fillIdentifyStat(<%= tried %>, <%= correct %>) });
 		</script>
 
 		<!-- Development: false data -->

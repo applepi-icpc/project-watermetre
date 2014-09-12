@@ -3,7 +3,8 @@ var app = app || {};
 var flashInterval = 200;
 
 app.alert = function pageAlert (str, noFlash) {
-	$('#alert').text(str).show();
+	$('#alert').text(str)
+	$('#alertWrap').show();
 	if (!noFlash) {
 		$('#alert').addClass('flash');
 		_.delay(function () {
@@ -19,10 +20,10 @@ app.alert = function pageAlert (str, noFlash) {
 };
 
 app.hideAlert = function hideAlert (duration) {
-	if (duration) $('#alert').hide(duration);
-	else $('#alert').hide();
+	if (duration) $('#alertWrap').hide(duration);
+	else $('#alertWrap').hide();
 };
 
 $('#alert').click(function () {
-	$('#alert').hide();
+	$('#alertWrap').hide();
 });

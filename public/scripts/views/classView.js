@@ -23,6 +23,11 @@ var ClassView = Backbone.View.extend({
 			teacher: this.class.get('teacher'),
 			message: this.class.get('msg')
 		}));
+		this.$el.data('attachedClass', {
+			index: this.class.get('index'),
+			seq: this.class.get('seq'),
+			className: this.class.get('name')
+		});
 	},
 
 	select: function () {

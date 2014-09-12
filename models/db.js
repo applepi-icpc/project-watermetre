@@ -3,7 +3,9 @@ var Db = require('mongodb').Db;
 var Connection = require('mongodb').Connection;
 var Server = require('mongodb').Server;
 
-var mongodb = new Db(settings.db, new Server(settings.host, Connection.DEFAULT_PORT, {}), { safe: true });
+var mongodb = new Db(settings.db, 
+	new Server(settings.host, Connection.DEFAULT_PORT, { auto_connect: true }, 20), 
+	{ safe: true });
 
 module.exports = mongodb;
 

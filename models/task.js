@@ -43,6 +43,7 @@ Task.prototype.changeStatus = function changeStatus (status) {
 	}
 };
 Task.prototype.getStatus = function getStatus () {
+	this.ensureStatus();
 	if (this._id) {
 		return statusHash[this._id];
 	} else {
@@ -70,6 +71,7 @@ Task.prototype.resetStat = function resetStat() {
 	}
 };
 Task.prototype.getStat = function getStat () {
+	this.ensureStat();
 	if (this._id) {
 		return statHash[this._id];
 	} else {
@@ -128,7 +130,7 @@ Task.prototype.createWorkers = function createWorkers() {
 Task.prototype.suspend = function suspend() {
 	if (this.getStatus() == 'succeeded') {
 		return "Task has already ended successfully."
-	} else if (workerHash[this._id]) {
+	} else if (this.getStatus() == 'running' && workerHash[this._id]) {
 		_.each(workerHash[this._id], function (worker) {
 			worker.stop();
 		});
@@ -146,7 +148,7 @@ Task.prototype.succeed = function suspend() {
 Task.prototype.start = function start() {
 	if (this.getStatus() == 'succeeded') {
 		return "Task has already ended successfully."
-	} else if (workerHash[this._id]) {
+	} else if (this.getStatus() == 'paused' && workerHash[this._id]) {
 		_.each(workerHash[this._id], function (worker, index) {
 			// Workers are started in turn, delayed by an interval.
 			_.delay(function () {
@@ -178,18 +180,20 @@ Task.prototype.remove = function remove(callback) {
 	if (self._id) {
 		db.collection('tasks', function(err, collection) {
 			if (err) {
-				return callback(err);
+				if (callback) return callback(err);
+				else return;
 			}
 			collection.remove({ _id: ObjectId.createFromHexString(self._id)}, function(err) {
 				if (!err) {
 					self.suspend();
 					workerHash[self._id] = undefined;
 				}
-				callback(err);
+				if (callback) callback(err);
 			});
 		});
 	} else {
-		return callback();
+		if (callback) return callback();
+		else return;
 	}
 };
 

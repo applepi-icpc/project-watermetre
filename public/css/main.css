@@ -83,7 +83,8 @@ h1 {
 h2 {
 	font-weight: inherit;
 	font-size: 24px;
-	margin: 0 0 15px 0;
+	/* margin: 0 0 15px 0; */
+	margin: 0;
 	padding: 15px 20px 10px 20px;
 }
 div.board {
@@ -93,10 +94,12 @@ div.board {
 }
 
 #dashboard div.board div.command {
-	margin: 12px 0 12px 0;
+	margin: 20px 0 12px 0;
 	width: auto;
 }
-
+#dashboard div.board div.command + div.command, #dashboard div.board div.block + div.command {
+	margin-top: 12px;
+}
 div.command {
 	cursor: pointer;
 	padding-left: 30px;
@@ -147,7 +150,7 @@ div.command span {
 #dashboard div.board div.block + div.block {
 	margin-top: 16px;
 }
-#dashboard div.board div.block span {
+#dashboard div.board div.block span, #dashboard div.board div.block input[type=text] {
 	display: block;
 	font-size: 60px;
 	line-height: 64px;
@@ -155,12 +158,26 @@ div.command span {
 	font-weight: 100;
 	margin-top: 3px;
 }
-
-#alert {
+#dashboard div.board div.block input[type=text] {
 	display: none;
-	margin: 10px 0 20px 0 !important;
-	text-align: left !important;
-	padding: 10px 10px !important;
+	width: 100%;
+	text-align: center;
+	border-bottom: 1px solid;
+	padding: 0;
+	margin-top: -1px;
+	margin-bottom: -5px;
+}
+
+#alertWrap {
+	display: none;
+	padding: 20px 0 0 0;
+	margin: 0;
+}
+#alertWrap #alert {
+	/* margin: 10px 0 20px 0; */
+	margin: 0;
+	text-align: left;
+	padding: 10px 10px;
 	line-height: 20px;
 	cursor: pointer;
 
@@ -234,6 +251,16 @@ div.task div.commandBar, div.class div.commandBar {
 	position: absolute;
 	left: 620px; top: 5px;
 }
+div.commandBar div.loadingBar {
+	display: none;
+	position: absolute;
+	left: -5px; top: -5px;
+	padding: 5px;
+	border-radius: 10px;
+	width: 100%; height: 100%;
+	background: url(../images/loading.gif) no-repeat center center;
+	background-color: rgba(255, 255, 255, .2);
+}
 div.task div.commandBar div.command, div.class div.commandBar div.command {
 	margin: 5px 0;
 }
@@ -250,6 +277,9 @@ div.class div.content {
 }
 div.task.succeeded div.content, div.class.selected div.content {
 	background-image: url(../images/bracketGreen.png);
+}
+div.taskIdentifier {
+	margin-top: 20px;
 }
 
 h3 {

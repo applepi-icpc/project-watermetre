@@ -11,7 +11,7 @@ exports.tried = 0;
 exports.correct = 0;
 exports.wrong = 0;
 
-var errId = 1001;
+// var errId = 1001;
 
 var id = 0;
 var getUid = function () {
@@ -39,7 +39,7 @@ exports.tryIdentify = function (jsessionid, callback) {
 		response.on('end', function () {
 			var raw = Buffer.concat(buffers, lenRaw);
 			var filePath = './tmp/' + getUid() + '.jpg';
-			var filePathErr = './bluecore/training/realdata/cap' + errId + '.jpg';
+			// var filePathErr = './bluecore/training/realdata/cap' + errId + '.jpg';
 			fs.open(filePath, 'wx', function (err, fd) {
 				if (err) {
 					return callback(err, false);

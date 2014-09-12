@@ -12,7 +12,7 @@ app.Task = Backbone.Model.extend({
 		classes: [ "" ]
 	},
 
-	start: function () {
+	start: function (errorCallback) {
 		if (this.isNew()) {
 			app.alert('Internal error: Operated a new task model.')
 		} else {
@@ -23,11 +23,12 @@ app.Task = Backbone.Model.extend({
 				timeout: 10000,
 				context: this,
 				error: function (jqXHR, textStatus, err) {
-					if (jqXHR.status != 500) {
-						app.alert('Message: ' + JSON.parse(jqXHR.responseText).error + ' (Status: ' + err + ')');
+					if (jqXHR.status == 500) {
+						app.alert('Task error: ' + JSON.parse(jqXHR.responseText).error + ' (Status: ' + err + ')');
 					} else {
-						app.alert('Task error: Internal Server Error.');
+						app.alert('Task error: ' + err);
 					}
+					errorCallback(jqXHR, textStatus, err);
 				},
 				success: function () {
 					this.set('status', 'running');
@@ -36,7 +37,7 @@ app.Task = Backbone.Model.extend({
 		}
 	},
 
-	suspend: function () {
+	suspend: function (errorCallback) {
 		if (this.isNew()) {
 			app.alert('Internal error: Operated a new task model.')
 		} else {
@@ -47,11 +48,12 @@ app.Task = Backbone.Model.extend({
 				timeout: 10000,
 				context: this,
 				error: function (jqXHR, textStatus, err) {
-					if (jqXHR.status != 500) {
-						app.alert('Message: ' + JSON.parse(jqXHR.responseText).error + ' (Status: ' + err + ')');
+					if (jqXHR.status == 500) {
+						app.alert('Task error: ' + JSON.parse(jqXHR.responseText).error + ' (Status: ' + err + ')');
 					} else {
-						app.alert('Task error: Internal Server Error.');
+						app.alert('Task error: ' + err);
 					}
+					errorCallback(jqXHR, textStatus, err);
 				},
 				success: function () {
 					this.set('status', 'paused');
@@ -60,7 +62,7 @@ app.Task = Backbone.Model.extend({
 		}
 	},
 
-	restart: function () {
+	restart: function (errorCallback) {
 		if (this.isNew()) {
 			app.alert('Internal error: Operated a new task model.')
 		} else {
@@ -71,11 +73,12 @@ app.Task = Backbone.Model.extend({
 				timeout: 10000,
 				context: this,
 				error: function (jqXHR, textStatus, err) {
-					if (jqXHR.status != 500) {
-						app.alert('Message: ' + JSON.parse(jqXHR.responseText).error + ' (Status: ' + err + ')');
+					if (jqXHR.status == 500) {
+						app.alert('Task error: ' + JSON.parse(jqXHR.responseText).error + ' (Status: ' + err + ')');
 					} else {
-						app.alert('Task error: Internal Server Error.');
+						app.alert('Task error: ' + err);
 					}
+					errorCallback(jqXHR, textStatus, err);
 				},
 				success: function () {
 					this.set('stat', { attempts: 0, errors: 0, last_error: null });
@@ -85,17 +88,18 @@ app.Task = Backbone.Model.extend({
 		}
 	},
 
-	removeFromServer: function () {
+	removeFromServer: function (errorCallback) {
 		if (this.isNew()) {
 			app.alert('Internal error: Operated a new task model.')
 		} else {
 			this.destroy({
 				error: function (model, response) {
-					if (jqXHR.status != 500) {
+					if (jqXHR.status == 500) {
 						app.alert('Task error: ' + JSON.parse(jqXHR.responseText).error + ' (Status: ' + err + ')');
 					} else {
-						app.alert('Task error: Internal Server Error.');
+						app.alert('Task error: ' + err);
 					}
+					errorCallback(jqXHR, textStatus, err);
 				}
 			});
 		}

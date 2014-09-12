@@ -41,6 +41,8 @@ router.post('/', function(req, res) {
 				res.status(500);
 				return res.json({error: err});
 			} else {
+				newTask.createWorkers();
+				newTask.start();
 				res.status(201);
 				return res.json(task);
 			}
