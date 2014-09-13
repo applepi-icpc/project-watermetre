@@ -1,5 +1,4 @@
 // This script runs on satellite computers, which is to send actual requests to elective system.
-
 var http = require('http');
 var https = require('https');
 var _ = require('underscore');
@@ -15,48 +14,47 @@ var timeout = 10000; // ms
 var host = 'www.watermetre.net';
 
 // For simplifying, ignore all uncaught exceptions.
-process.on('uncaughtException', function (err) {});
+// process.on('uncaughtException', function (err) {});
 
 // POST / with {jsessionid, seq, index}
-http.createServers(function(req, res) {
-	var parsedUrl = url.parse(request.url);
-	if (parsedUrl.pathname != '/' || request.method != 'POST') {
-		response.writeHead(404);
-		response.end();
+http.createServer(function(req, res) {
+	var parsedUrl = url.parse(req.url);
+	if (parsedUrl.pathname != '/' || req.method != 'POST') {
+		res.writeHead(404);
+		res.end();
 	} else {
 		var buffers = [];
 		var len = 0;
-		request.addListener('data', function (chunk) {
+		req.on('data', function (chunk) {
 			buffers.push(chunk);
 			len += chunk.length;
-		);
-		request.addListener('end', function () {
+		});
+		req.on('end', function () {
 			var bufferRaw = Buffer.concat(buffers, len);
 			var json = bufferRaw.toString('utf8');
 			var workObject = JSON.parse(json);
-
-			console.log(workObject);
 
 			// TODO: Finish the actual code.
 
 			// result: OK - succeeded, Full - not avaliable, Other - some exceptions
 			var result = 'Full';
-			response.writeHead(200, {
+			res.writeHead(200, {
 				'Content-Length': (new Buffer(result, 'utf8')).length,
 				'Content-Type': 'text/plain'
 			});
-			response.write(result, 'utf8');
-			response.end();
+			res.write(result, 'utf8');
+			res.end();
 		});
 	}
 }).listen(3333);
-console.log('Satellite start to listen port 3333').
+console.log('Satellite start to listen port 3333.');
 
 setInterval(function () {
 	var req = https.request({
 		hostname: host,
 		path: '/satellites/heartbeat',
-		method: 'POST'
+		method: 'POST',
+		rejectUnauthorized: false
 	}, function (response) {
 		req.abort();
 	});
@@ -71,3 +69,5 @@ setInterval(function () {
 	});
 	req.end();
 }, heartbeatInterval);
+console.log('Heartbeat start.');
+

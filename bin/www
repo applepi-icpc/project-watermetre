@@ -28,6 +28,8 @@ Db.initialize(function (err) {
 				var httpsServer = https.createServer(cred, app);
 				httpsServer.listen(3443);
 
+				var satelliteServer = require('../satellite-server.js');
+
 				var redirect = http.createServer(function(req, res) {
 					var path = url.parse(req.url).path;
 					res.writeHead(302, {

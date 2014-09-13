@@ -38,7 +38,7 @@ exports.tryIdentify = function (jsessionid, callback) {
 		});
 		response.on('end', function () {
 			var raw = Buffer.concat(buffers, lenRaw);
-			var filePath = './tmp/' + getUid() + '.jpg';
+			var filePath = './utility/tmp/' + getUid() + '.jpg';
 			// var filePathErr = './bluecore/training/realdata/cap' + errId + '.jpg';
 			fs.open(filePath, 'wx', function (err, fd) {
 				if (err) {

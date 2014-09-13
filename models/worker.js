@@ -57,6 +57,8 @@ Worker.prototype.work = function work (callback) {
 			}
 		});
 	}
+
+	workFunction();
 };
 Worker.prototype.start = function start () {
 	var self = this;
@@ -75,7 +77,7 @@ Worker.prototype.start = function start () {
 				stat.last_error = 'Wrong user ID or password.'
 				self.task.suspend();
 			} else {
-				this.jsessionid = user.jsessionid;
+				self.jsessionid = user.jsessionid;
 				self.intervalId = setInterval(function() {
 					self.work(function(err, ended) {
 						++stat.attempts;

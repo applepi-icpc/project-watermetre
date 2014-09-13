@@ -1,28 +1,33 @@
-var export = {};
-module.exports = export;
+var http = require('http');
+var settings = require('../settings.js');
+
+var exports = {};
+module.exports = exports;
 
 var expireTime = 20000; // ms
 var timeout = 10000; // ms
 
-export.lastHeartbeat = {}; // stores ip => lastHeartbeat (Unix time)
-export.queue = []; // stores ip
+exports.lastHeartbeat = {}; // stores ip => lastHeartbeat (Unix time)
+exports.lastHeartbeat[settings.hostIP] = new Date().getTime();
+exports.queue = [ settings.hostIP ]; // stores ip
 
 // callback(err, status)
-export.sendRequest = function (jsessionid, seq, index, callback) {
+exports.sendRequest = function (jsessionid, seq, index, callback) {
 	var satellite;
 	var now = new Date().getTime();
-	while (export.queue.length > 0) {
-		satellite = export.queue.shift();
-		if (now - lastHeartbeat <= expireTime) break;
+	while (exports.queue.length > 0) {
+		satellite = exports.queue.shift();
+		if (now - exports.lastHeartbeat[satellite] <= expireTime) break;
 		else satellite = undefined;
 	}
 	if (!satellite) {
 		return callback('No avaliable satellites.');
 	}
-	export.queue.push(satellite);
+	exports.queue.push(satellite);
 
 	var req = http.request({
-		hostname: satellite,
+		host: satellite,
+		port: 3333,
 		path: '/',
 		method: 'POST'
 	}, function (response) {
@@ -55,7 +60,7 @@ export.sendRequest = function (jsessionid, seq, index, callback) {
 	req.write(JSON.stringify({
 		jsessionid: jsessionid,
 		seq: seq,
-		index, index
+		index: index
 	}), 'utf8');
 	req.end();
-}
+};
