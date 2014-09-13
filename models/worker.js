@@ -1,6 +1,12 @@
 var Task = require('./user.js');
+var Satellite = require('./satellite.js');
+var User = require('./user.js');
 var settings = require('../settings.js');
+var identifier = require('../utility/identify.js');
 var _ = require('underscore');
+
+var retryLoginTime = 1000; // ms
+var retryIdentifyTime = 500; // ms
 
 function Worker(worker) {
 	this.user_id = worker.user_id;
@@ -20,43 +26,70 @@ module.exports = Worker;
 Worker.prototype.work = function work (callback) {
 	var self = this;
 
-	// TODO: Finish this core function
-
-	// Test code here.
 	self.task.ensureStat();
 	var stat = self.task.getStat();
 
-	if (stat.attempts >= 500) {
-		_.delay(callback, 1000, null, true);
-	} else if (stat.attempts == 4 || stat.attempts == 12) {
-		_.delay(callback, 1000, "Test error.", false);
-	} else {
-		_.delay(callback, 1000, null, false);
+	// Identify until success
+	var workFunction = function () {
+		identifier.tryIdentify(self.jsessionid, function (err, success) {
+			if (err == 'Session expired.') {
+				++stat.errors;
+				stat.last_error = 'Session expired.'
+				this.stop();
+				this.start();
+			} else if (err || !success) {
+				if (err) {
+					++stat.errors;
+					stat.last_error = 'Captcha identification exception.';
+				}
+				setTimeout(workFunction, retryIdentifyTime);
+			} else {
+				// Success
+				Satellite.sendRequest(self.jsessionid, self.seq, self.index, function (err, status) {
+					if (err) {
+						return callback(err, false);
+					} else if (status == 'OK') {
+						return callback(null, true);
+					} else {
+						return callback(null, false);
+					}
+				});
+			}
+		});
 	}
 };
 Worker.prototype.start = function start () {
 	var self = this;
 	if (!self.intervalId) {
-		// TODO: Try to login and store jsession ID.
 		// If login failed, change tasks' status to paused, and remain intervalId null.
+		User.login(self.user_id, self.password, function(err, statusCode, user) {
+			self.task.ensureStat();
+			var stat = self.task.getStat();
 
-		self.intervalId = setInterval(function() {
-			self.work(function(err, ended) {
-				self.task.ensureStat();
-				var stat = self.task.getStat();
-				self.task.ensureStatus();
-				var status = self.task.getStatus();
-
-				++stat.attempts;
-				if (err) {
-					++stat.errors;
-					stat.last_error = err;
-				} 
-				if (ended) {
-					self.task.succeed();
-				}
-			});
-		}, settings.retryInterval);
+			if (statusCode == 500) { // Internal Server Error
+				++stat.errors;
+				stat.last_error = 'Failed to login (Internal Server Error).'
+				setTimeout(self.start, retryLoginTime);
+			} else if (statusCode == 403) { // Wrong user ID || Password
+				++stat.errors;
+				stat.last_error = 'Wrong user ID or password.'
+				self.task.suspend();
+			} else {
+				this.jsessionid = user.jsessionid;
+				self.intervalId = setInterval(function() {
+					self.work(function(err, ended) {
+						++stat.attempts;
+						if (err) {
+							++stat.errors;
+							stat.last_error = err;
+						} 
+						if (ended) {
+							self.task.succeed();
+						}
+					});
+				}, settings.retryInterval);
+			}
+		});
 	}
 };
 Worker.prototype.stop = function stop () {
