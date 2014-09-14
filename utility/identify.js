@@ -2,7 +2,7 @@ var bluecore = require('../bluecore/pkucaptcha');
 var http = require('http');
 var fs = require('fs');
 
-var timeout = 10000; // milliseconds
+var timeout = 5000; // milliseconds
 
 var exports = [];
 module.exports = exports;

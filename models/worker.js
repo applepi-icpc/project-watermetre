@@ -2,7 +2,6 @@ var Task = require('./user.js');
 var Satellite = require('./satellite.js');
 var User = require('./user.js');
 var settings = require('../settings.js');
-var identifier = require('../utility/identify.js');
 var _ = require('underscore');
 
 var retryLoginTime = 1000; // ms
@@ -29,36 +28,21 @@ Worker.prototype.work = function work (callback) {
 	self.task.ensureStat();
 	var stat = self.task.getStat();
 
-	// Identify until success
-	var workFunction = function () {
-		identifier.tryIdentify(self.jsessionid, function (err, success) {
-			if (err == 'Session expired.') {
-				++stat.errors;
-				stat.last_error = 'Session expired.'
-				this.stop();
-				this.start();
-			} else if (err || !success) {
-				if (err) {
-					++stat.errors;
-					stat.last_error = 'Captcha identification exception.';
-				}
-				setTimeout(workFunction, retryIdentifyTime);
-			} else {
-				// Success
-				Satellite.sendRequest(self.jsessionid, self.seq, self.index, function (err, status) {
-					if (err) {
-						return callback(err, false);
-					} else if (status == 'OK') {
-						return callback(null, true);
-					} else {
-						return callback(null, false);
-					}
-				});
-			}
-		});
-	}
+	Satellite.sendRequest(self.jsessionid, self.seq, self.index, function (err, status) {
+		if (err) {
+			return callback(err, false);
+		} else if (status == 'OK') {
+			return callback(null, true);
+		} else if (status == 'Expired') {
+			++stat.errors;
+			stat.last_error = 'Session expired.';
+			this.stop();
+			this.start();
+		} else {
+			return callback(null, false);
+		}
+	});
 
-	workFunction();
 };
 Worker.prototype.start = function start () {
 	var self = this;
