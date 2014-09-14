@@ -3,7 +3,7 @@ var http = require('http');
 var https = require('https');
 var _ = require('underscore');
 var url = require('url');
-var identifier = require('utility/identify.js');
+var identifier = require('./utility/identify.js');
 
 // Heartbeat interval.
 var heartbeatInterval = 5000; // ms;
