@@ -3,6 +3,7 @@ var http = require('http');
 var https = require('https');
 var _ = require('underscore');
 var url = require('url');
+var identifier = require('./utility/identify.js');
 
 // Heartbeat interval.
 var heartbeatInterval = 5000; // ms;
@@ -12,6 +13,10 @@ var timeout = 10000; // ms
 
 // Home planet's host.
 var host = 'www.watermetre.net';
+
+// Retrying options.
+var maxRetry = 10;
+var retryIdentifyTime = 500; // ms
 
 // For simplifying, ignore all uncaught exceptions.
 // process.on('uncaughtException', function (err) {});
@@ -34,16 +39,48 @@ http.createServer(function(req, res) {
 			var json = bufferRaw.toString('utf8');
 			var workObject = JSON.parse(json);
 
-			// TODO: Finish the actual code.
+			var resFunction = function (result) {
+				var toSend = JSON.stringify(result);
+				res.writeHead(200, {
+					'Content-Length': (new Buffer(toSend, 'utf8')).length,
+					'Content-Type': 'text/plain'
+				});
+				res.write(toSend, 'utf8');
+				res.end();
+			};
 
-			// result: OK - succeeded, Full - not avaliable, Other - some exceptions
-			var result = 'Full';
-			res.writeHead(200, {
-				'Content-Length': (new Buffer(result, 'utf8')).length,
-				'Content-Type': 'text/plain'
-			});
-			res.write(result, 'utf8');
-			res.end();
+			var workFunction = function (retried) {
+				identifier.tryIdentify(workObject.jsessionid, function (err, success) {
+					// result: OK, Full, Expired, RetriedTooMany
+					var result = {};
+					result.wrong = 0;
+					result.correct = 0;
+
+					if (err == 'Session expired.') {
+						result.status = 'Expired';
+						return resFunction(result);
+					} else if (err || !success) {
+						if (!success) {
+							++result.wrong;
+						}
+						if (retried < maxRetry) {
+							setTimeout(workFunction, retryIdentifyTime, retried + 1);
+						} else {
+							result.status = 'RetriedTooMuch';
+							return resFunction(result);
+						}
+					} else {
+						++result.correct;
+
+						// TODO: Finish the actual code.
+
+						result.status = 'Full';
+						return resFunction(result);
+					}
+				});
+			};
+
+			workFunction(0);
 		});
 	}
 }).listen(3333);
