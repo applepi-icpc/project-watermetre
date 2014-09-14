@@ -1,11 +1,12 @@
 var http = require('http');
 var settings = require('../settings.js');
+var identifier = require('../utility/identify.js');
 
 var exports = {};
 module.exports = exports;
 
 var expireTime = 20000; // ms
-var timeout = 10000; // ms
+var timeout = 15000; // ms
 
 exports.lastHeartbeat = {}; // stores ip => lastHeartbeat (Unix time)
 exports.lastHeartbeat[settings.hostIP] = new Date().getTime();
@@ -41,13 +42,20 @@ exports.sendRequest = function (jsessionid, seq, index, callback) {
 			len += chunk.length;
 		});
 		response.on('end', function () {
-			var res = Buffer.concat(buffers, len).toString('utf8');
-			if (res == 'OK') {
+			var res = JSON.parse(Buffer.concat(buffers, len).toString('utf8'));
+
+			identifier.tried += res.correct + res.wrong;
+			identifier.correct += res.correct;
+			identifier.wrong += res.wrong;
+
+			if (res.status == 'OK') {
 				return callback(null, 'OK');
-			} else if (res == 'Full') {
+			} else if (res.status == 'Full') {
 				return callback(null, 'Full');
+			} else if (res.status == 'Expired') {
+				return callback(null, 'Expired');
 			} else {
-				return callback(res);
+				return callback('Satellite: Retried too many times');
 			}
 		});
 	});
