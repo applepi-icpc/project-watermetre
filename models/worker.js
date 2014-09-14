@@ -83,7 +83,7 @@ Worker.prototype.start = function start () {
 						++stat.attempts;
 						if (err) {
 							++stat.errors;
-							stat.last_error = err;
+							stat.last_error = err.toString();
 						} 
 						if (ended) {
 							self.task.succeed();

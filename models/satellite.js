@@ -18,7 +18,10 @@ exports.sendRequest = function (jsessionid, seq, index, callback) {
 	while (exports.queue.length > 0) {
 		satellite = exports.queue.shift();
 		if (now - exports.lastHeartbeat[satellite] <= expireTime) break;
-		else satellite = undefined;
+		else {
+			delete exports.lastHeartbeat[satellite];
+			satellite = undefined;
+		}
 	}
 	if (!satellite) {
 		return callback('No avaliable satellites.');
@@ -55,7 +58,7 @@ exports.sendRequest = function (jsessionid, seq, index, callback) {
 		});
 	});
 	req.on('error', function (err) {
-		return callback(err);
+		return callback("Satellite error.");
 	});
 	req.write(JSON.stringify({
 		jsessionid: jsessionid,
