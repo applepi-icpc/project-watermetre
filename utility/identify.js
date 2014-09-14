@@ -68,12 +68,10 @@ exports.tryIdentify = function (jsessionid, callback) {
 								});
 								response.on('end', function () {
 									var resBody = Buffer.concat(buffers, len).toString('utf8');
-									++exports.tried;
 									if (resBody.search('<title>') != -1) { // session expired
 										return callback('Session expired.', false);
 									}
 									else if (resBody.search('<valid>2</valid>') == -1) {
-										++exports.wrong;
 										/* fs.open(filePathErr, 'w', function (err, fdErr) {
 											if (!err) {
 												fs.write(fdErr, raw, 0, lenRaw, null, function (err) {
@@ -89,7 +87,6 @@ exports.tryIdentify = function (jsessionid, callback) {
 										return callback(undefined, false);
 									}
 									else {
-										++exports.correct;
 										return callback(undefined, true);
 									}
 								});
