@@ -5,6 +5,7 @@ var _ = require('underscore');
 var url = require('url');
 var identifier = require('./utility/identify.js');
 var crypto = require('crypto');
+var settings = require('./settings.js');
 
 // Heartbeat interval.
 var heartbeatInterval = 5000; // ms;
@@ -40,11 +41,10 @@ http.createServer(function(req, res) {
 			var jsonCipher = bufferRaw.toString('utf8');
 
 			var decipher = crypto.createDecipher('aes192', settings.edgePassword);
-			decipher.update(jsonCipher, 'base64');
-			var json = decipher.final('utf8');
+			var json = decipher.update(jsonCipher, 'base64', 'utf8');
+			json += decipher.final('utf8');
 
 			var workObject = JSON.parse(json);
-			console.log(workObject);
 
 			var resFunction = function (result) {
 				var toSend = JSON.stringify(result);

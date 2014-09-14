@@ -36,8 +36,8 @@ Worker.prototype.work = function work (callback) {
 		} else if (status == 'Expired') {
 			++stat.errors;
 			stat.last_error = 'Session expired.';
-			this.stop();
-			this.start();
+			self.stop();
+			self.start();
 		} else {
 			return callback(null, false);
 		}

@@ -36,9 +36,8 @@ exports.sendRequest = function (jsessionid, seq, index, callback) {
 		index: index
 	});
 	var cipher = crypto.createCipher('aes192', settings.edgePassword);
-	cipher.update(plain, 'utf8');
-	var toSend = cipher.final('base64');
-	console.log(toSend);
+	var toSend = cipher.update(plain, 'utf8', 'base64');
+	toSend += cipher.final('base64');
 
 	var req = http.request({
 		host: satellite,
