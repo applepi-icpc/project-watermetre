@@ -58,7 +58,7 @@ http.createServer(function(req, res) {
 
 			var workFunction = function (retried) {
 				identifier.tryIdentify(workObject.jsessionid, function (err, success) {
-					// result: OK, Full, Expired, RetriedTooMany
+					// result: OK, Full, Expired, RetriedTooMany, Error
 					var result = {};
 					result.wrong = 0;
 					result.correct = 0;
@@ -79,10 +79,50 @@ http.createServer(function(req, res) {
 					} else {
 						++result.correct;
 
-						// TODO: Finish the actual code.
+						var reqSupplement = http.request({
+							hostname: 'elective.pku.edu.cn',
+							path: '/elective2008/edu/pku/stu/elective/controller/supplement/electSupplement.do?index=' + workObject.index + '&seq=' + workObject.seq,
+							headers: {
+								'cookie': 'JSESSIONID=' + jsessionid
+							},
+							method: 'GET'
+						}, function (response) {
+							var buffers = [];
+							var len = 0;
+							response.on('data', function (chunk) {
+								buffers.push(chunk);
+								len += chunk.length;
+							});
+							response.on('end', function () {
+								var resBody = Buffer.concat(buffers, len).toString('utf8');
 
-						result.status = 'Full';
-						return resFunction(result);
+								if (resBody.search('success.gif') != -1) {
+									// Yeeeeeeeeeeeeeeah!!!
+									result.status = 'OK';
+								} else {
+									var msg = s.match(/<label class=\'message_error\'>(.*?)<\/label>/)[1];
+									if (msg == '该课程选课人数已满。') {
+										result.status = 'Full';
+									} else {
+										result.status = 'Error';
+										result.err = msg;
+									}
+								}
+
+								return resFunction(result);
+							});
+						});
+						reqSupplement.on('socket', function (socket) {
+							socket.setTimeout(timeout);
+							socket.on('timeout', function () {
+								reqSupplement.abort();
+							})
+						});
+						reqSupplement.on('error', function (err) {
+							res.status(500);
+							res.json({error: err});
+						});
+						reqSupplement.end();
 					}
 				});
 			};

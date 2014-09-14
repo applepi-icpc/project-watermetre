@@ -64,8 +64,10 @@ exports.sendRequest = function (jsessionid, seq, index, callback) {
 				return callback(null, 'Full');
 			} else if (res.status == 'Expired') {
 				return callback(null, 'Expired');
-			} else {
+			} else if (res.status == 'RetriedTooMuch') {
 				return callback('Satellite: Retried too many times');
+			} else {
+				return callback(res.err);
 			}
 		});
 	});
