@@ -4,6 +4,7 @@ var https = require('https');
 var _ = require('underscore');
 var url = require('url');
 var identifier = require('./utility/identify.js');
+var crypto = require('crypto');
 
 // Heartbeat interval.
 var heartbeatInterval = 5000; // ms;
@@ -36,8 +37,14 @@ http.createServer(function(req, res) {
 		});
 		req.on('end', function () {
 			var bufferRaw = Buffer.concat(buffers, len);
-			var json = bufferRaw.toString('utf8');
+			var jsonCipher = bufferRaw.toString('utf8');
+
+			var decipher = crypto.createDecipher('aes192', settings.edgePassword);
+			decipher.update(jsonCipher, 'base64');
+			var json = decipher.final('utf8');
+
 			var workObject = JSON.parse(json);
+			console.log(workObject);
 
 			var resFunction = function (result) {
 				var toSend = JSON.stringify(result);

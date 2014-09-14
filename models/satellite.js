@@ -1,6 +1,7 @@
 var http = require('http');
 var settings = require('../settings.js');
 var identifier = require('../utility/identify.js');
+var crypto = require('crypto');
 
 var exports = {};
 module.exports = exports;
@@ -28,6 +29,16 @@ exports.sendRequest = function (jsessionid, seq, index, callback) {
 		return callback('No avaliable satellites.');
 	}
 	exports.queue.push(satellite);
+
+	var plain = JSON.stringify({
+		jsessionid: jsessionid,
+		seq: seq,
+		index: index
+	});
+	var cipher = crypto.createCipher('aes192', settings.edgePassword);
+	cipher.update(plain, 'utf8');
+	var toSend = cipher.final('base64');
+	console.log(toSend);
 
 	var req = http.request({
 		host: satellite,
@@ -68,10 +79,6 @@ exports.sendRequest = function (jsessionid, seq, index, callback) {
 	req.on('error', function (err) {
 		return callback("Satellite error.");
 	});
-	req.write(JSON.stringify({
-		jsessionid: jsessionid,
-		seq: seq,
-		index: index
-	}), 'utf8');
+	req.write(toSend, 'utf8');
 	req.end();
 };
