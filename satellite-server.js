@@ -67,7 +67,8 @@ http.createServer(function(req, res) {
 						result.status = 'Expired';
 						return resFunction(result);
 					} else if (err || !success) {
-						if (!success) {
+						if (!err) {
+							console.log('WRONG');
 							++result.wrong;
 						}
 						if (retried < maxRetry) {
