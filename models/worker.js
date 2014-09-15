@@ -31,6 +31,8 @@ module.exports = Worker;
 Worker.prototype.work = function work (callback) {
 	var self = this;
 
+	console.log('[WORK] ' + self.user_id + ' ' + self.seq);
+
 	self.task.ensureStat();
 	var stat = self.task.getStat();
 

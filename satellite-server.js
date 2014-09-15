@@ -56,13 +56,13 @@ http.createServer(function(req, res) {
 				res.end();
 			};
 
+			// result: OK, Full, Expired, RetriedTooMany, Error
+			var result = {};
+			result.wrong = 0;
+			result.correct = 0;
+
 			var workFunction = function (retried) {
 				identifier.tryIdentify(workObject.jsessionid, function (err, success) {
-					// result: OK, Full, Expired, RetriedTooMany, Error
-					var result = {};
-					result.wrong = 0;
-					result.correct = 0;
-
 					if (err == 'Session expired.') {
 						result.status = 'Expired';
 						return resFunction(result);
