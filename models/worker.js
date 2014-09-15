@@ -40,10 +40,8 @@ Worker.prototype.work = function work (callback) {
 		if (err || status == 'Expired') {
 			++self.consecutiveError;
 			if (self.consecutiveError > maxConsecutiveError) {
-				if (self.intervalId) {
-					self.stop();
-					self.start();
-				}
+				self.stop();
+				self.start();
 			} else if (self.running) {
 				self.timeoutId = setTimeout(function() { self.doWork(); }, settings.retryInterval);
 			}
