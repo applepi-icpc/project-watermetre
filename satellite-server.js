@@ -122,44 +122,16 @@ http.createServer(function(req, res) {
 							})
 						});
 						reqSupplement.on('error', function (err) {
-							res.status(500);
-							res.json({error: err});
+							result.status = 'Error';
+							result.err = 'Supplement error.';
+							return resFunction(result);
 						});
 						reqSupplement.end();
 					}
 				});
 			};
 
-			var reqPage = http.request({
-				hostname: 'elective.pku.edu.cn',
-				path: '/elective2008/edu/pku/stu/elective/controller/supplement/SupplyCancel.do',
-				headers: {
-					'cookie': 'JSESSIONID=' + workObject.jsessionid
-				},
-				method: 'GET'
-			}, function (response) {
-				var buffers = [];
-				var len = 0;
-				response.on('data', function (chunk) {
-					buffers.push(chunk);
-					len += chunk.length;
-				});
-				response.on('end', function () {
-					var resBody = Buffer.concat(buffers, len).toString('utf8');
-					workFunction(0);
-				});
-			});
-			reqPage.on('socket', function (socket) {
-				socket.setTimeout(timeout);
-				socket.on('timeout', function () {
-					reqPage.abort();
-				})
-			});
-			reqPage.on('error', function (err) {
-				res.status(500);
-				res.json({error: err});
-			});
-			reqPage.end();
+			workFunction(0);
 		});
 	}
 }).listen(3333);
