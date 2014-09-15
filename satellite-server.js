@@ -83,7 +83,7 @@ http.createServer(function(req, res) {
 							hostname: 'elective.pku.edu.cn',
 							path: '/elective2008/edu/pku/stu/elective/controller/supplement/electSupplement.do?index=' + workObject.index + '&seq=' + workObject.seq,
 							headers: {
-								'cookie': 'JSESSIONID=' + jsessionid
+								'Cookie': 'JSESSIONID=' + workObject.jsessionid,
 							},
 							method: 'GET'
 						}, function (response) {
@@ -97,11 +97,14 @@ http.createServer(function(req, res) {
 								var resBody = Buffer.concat(buffers, len).toString('utf8');
 
 								if (resBody.search('success.gif') != -1) {
-									// Yeeeeeeeeeeeeeeah!!!
+									// Yeeeeeeeeeeeeeeaaaaaaaaaaaaaaaaaah!!!
 									result.status = 'OK';
 								} else {
-									var msg = s.match(/<label class=\'message_error\'>(.*?)<\/label>/)[1];
-									if (msg == '该课程选课人数已满。') {
+									var msg = resBody.match(/<label class=\'message_error\'>(.*?)<\/label>/);
+									if (!msg) {
+										result.status = 'Error';
+										result.err = 'Server denied.';
+									} else if (msg[1] == '该课程选课人数已满。') {
 										result.status = 'Full';
 									} else {
 										result.status = 'Error';
@@ -127,7 +130,36 @@ http.createServer(function(req, res) {
 				});
 			};
 
-			workFunction(0);
+			var reqPage = http.request({
+				hostname: 'elective.pku.edu.cn',
+				path: '/elective2008/edu/pku/stu/elective/controller/supplement/SupplyCancel.do',
+				headers: {
+					'cookie': 'JSESSIONID=' + workObject.jsessionid
+				},
+				method: 'GET'
+			}, function (response) {
+				var buffers = [];
+				var len = 0;
+				response.on('data', function (chunk) {
+					buffers.push(chunk);
+					len += chunk.length;
+				});
+				response.on('end', function () {
+					var resBody = Buffer.concat(buffers, len).toString('utf8');
+					workFunction(0);
+				});
+			});
+			reqPage.on('socket', function (socket) {
+				socket.setTimeout(timeout);
+				socket.on('timeout', function () {
+					reqPage.abort();
+				})
+			});
+			reqPage.on('error', function (err) {
+				res.status(500);
+				res.json({error: err});
+			});
+			reqPage.end();
 		});
 	}
 }).listen(3333);

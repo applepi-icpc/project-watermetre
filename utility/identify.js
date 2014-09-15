@@ -3,6 +3,7 @@ var http = require('http');
 var fs = require('fs');
 
 var timeout = 5000; // milliseconds
+var userAgent = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_4) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/37.0.2062.120 Safari/537.36';
 
 var exports = [];
 module.exports = exports;
@@ -26,7 +27,7 @@ exports.tryIdentify = function (jsessionid, callback) {
 		hostname: 'elective.pku.edu.cn',
 		path: '/elective2008/DrawServlet',
 		headers: {
-			'cookie': 'JSESSIONID=' + jsessionid
+			'Cookie': 'JSESSIONID=' + jsessionid
 		},
 		method: 'GET'
 	}, function (response) {
@@ -56,7 +57,7 @@ exports.tryIdentify = function (jsessionid, callback) {
 								hostname: 'elective.pku.edu.cn',
 								path: '/elective2008/edu/pku/stu/elective/controller/supplement/validate.do?validCode=' + res,
 								headers: {
-									'cookie': 'JSESSIONID=' + jsessionid
+									'Cookie': 'JSESSIONID=' + jsessionid
 								},
 								method: 'GET'
 							}, function (response) {

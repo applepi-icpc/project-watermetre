@@ -36,6 +36,7 @@ Worker.prototype.work = function work (callback) {
 		} else if (status == 'Expired') {
 			++stat.errors;
 			stat.last_error = 'Session expired.';
+			console.log('Session expired.');
 			self.stop();
 			self.start();
 		} else {
@@ -46,6 +47,10 @@ Worker.prototype.work = function work (callback) {
 };
 Worker.prototype.start = function start () {
 	var self = this;
+
+	// For debug
+	console.log(self.task);
+
 	if (!self.intervalId) {
 		// If login failed, change tasks' status to paused, and remain intervalId null.
 		User.login(self.user_id, self.password, function(err, statusCode, user) {
