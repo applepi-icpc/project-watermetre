@@ -178,7 +178,7 @@ $(function () {
 				data: {
 					username: app.nowUserName,
 					password: app.nowPassword
-				}
+				},
 				dataType: 'json',
 				timeout: 45000,
 				context: this,
