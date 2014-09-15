@@ -53,6 +53,7 @@ exports.sendRequest = function (jsessionid, seq, index, callback) {
 		});
 		response.on('end', function () {
 			var res = JSON.parse(Buffer.concat(buffers, len).toString('utf8'));
+			console.log('From satellite ' + satellite + ': ');
 			console.log(res);
 
 			identifier.tried += res.correct + res.wrong;

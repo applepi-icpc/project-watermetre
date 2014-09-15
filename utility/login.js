@@ -2,7 +2,7 @@ var http = require('http');
 var https = require('https');
 var querystring = require('querystring');
 
-var timeout = 30000;
+var timeout = 15000;
 
 var exports = [];
 module.exports = exports;
@@ -16,15 +16,27 @@ exports.login = function (username, password, callback) {
 	}, function (response) {
 		var jsessionid = response.headers['set-cookie'][0].match(/JSESSIONID=([^;]+)/)[1];
 		reqSsoLogin.abort();
+
+		// To prevent the weird condition that callback is not work.
+		var lockS2 = setTimeout(function() { callback('Timeout.'); }, timeout);
+
+		var postData = querystring.stringify({
+			appid: 'syllabus',
+			userName: username,
+			password: password,
+			redirUrl: 'http://elective.pku.edu.cn:80/elective2008/agent4Iaaa.jsp/../ssoLogin.do'
+		});
 		var reqOAuth = https.request({
 			hostname: 'iaaa.pku.edu.cn',
 			path: '/iaaa/oauthlogin.do',
 			headers: {
 				'cookie': 'JSESSIONID=' + jsessionid,
-				'content-type': 'application/x-www-form-urlencoded'
+				'content-type': 'application/x-www-form-urlencoded',
+				'content-length': postData.length
 			},
 			method: 'POST'
 		}, function (response) {
+			clearTimeout(lockS2);
 			var buffers = [];
 			var len = 0;
 			response.on('data', function (chunk) {
@@ -58,13 +70,10 @@ exports.login = function (username, password, callback) {
 				});
 				reqElec.end();
 			});
+			response.on('abort', function () {
+				clearTimeout(lockS2);
+			});
 		});
-		reqOAuth.write(querystring.stringify({
-			appid: 'syllabus',
-			userName: username,
-			password: password,
-			redirUrl: 'http://elective.pku.edu.cn:80/elective2008/agent4Iaaa.jsp/../ssoLogin.do'
-		}), 'utf8');
 		reqOAuth.on('socket', function (socket) {
 			socket.setTimeout(timeout);
 			socket.on('timeout', function () {
@@ -74,6 +83,7 @@ exports.login = function (username, password, callback) {
 		reqOAuth.on('error', function(err) {
 			return callback(err);
 		});
+		reqOAuth.write(postData);
 		reqOAuth.end();
 	});
 	reqSsoLogin.on('socket', function (socket) {

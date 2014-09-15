@@ -80,61 +80,51 @@ Worker.prototype.start = function start () {
 	self.consecutiveError = 0;
 
 	// For debug
-	console.log('Start worker: ');
-	console.log(self);
+	console.log('[START] ' + self.user_id + ' ' + self.seq);
 
-	if (!self.intervalId) {
-		// If login failed, change tasks' status to paused, and remain intervalId null.
-		User.login(self.user_id, self.password, function(err, statusCode, user) {
-			self.task.ensureStat();
-			var stat = self.task.getStat();
+	// If login failed, change tasks' status to paused.
+	User.login(self.user_id, self.password, function(err, statusCode, user) {
+		self.task.ensureStat();
+		var stat = self.task.getStat();
 
-			if (statusCode == 500) { // Internal Server Error
+		if (statusCode == 500) { // Internal Server Error
+			++stat.errors;
+			stat.last_error = 'Failed to login (Internal Server Error).';
+			setTimeout(function () { self.start(); }, retryLoginTime);
+		} else if (statusCode == 403) { // Wrong user ID || Password
+			++stat.errors;
+			stat.last_error = 'Wrong user ID or password.';
+			self.task.suspend();
+		} else {
+			self.jsessionid = user.jsessionid;
+			var reqPage = http.request({
+				hostname: 'elective.pku.edu.cn',
+				path: '/elective2008/edu/pku/stu/elective/controller/supplement/SupplyCancel.do',
+				headers: {
+					'cookie': 'JSESSIONID=' + self.jsessionid
+				},
+				method: 'GET'
+			}, function (response) {
+				response.on('data', function() {});
+				response.on('end', function() {
+					self.running = true;
+					self.timeoutId = setTimeout(function() { self.doWork(); }, settings.retryInterval);
+				});
+			});
+			reqPage.on('socket', function (socket) {
+				socket.setTimeout(timeout);
+				socket.on('timeout', function () {
+					reqPage.abort();
+				})
+			});
+			reqPage.on('error', function (err) {
 				++stat.errors;
-				console.log('Login process get 500: ');
-				console.log(err);
-				stat.last_error = 'Failed to login (Internal Server Error).'
+				stat.last_error = 'Failed to fetch supply page (Internal Server Error).'
 				setTimeout(function () { self.start(); }, retryLoginTime);
-			} else if (statusCode == 403) { // Wrong user ID || Password
-				++stat.errors;
-				stat.last_error = 'Wrong user ID or password.'
-				self.task.suspend();
-			} else {
-				self.jsessionid = user.jsessionid;
-				var reqPage = http.request({
-					hostname: 'elective.pku.edu.cn',
-					path: '/elective2008/edu/pku/stu/elective/controller/supplement/SupplyCancel.do',
-					headers: {
-						'cookie': 'JSESSIONID=' + self.jsessionid
-					},
-					method: 'GET'
-				}, function (response) {
-					var buffers = [];
-					var len = 0;
-					response.on('data', function (chunk) {
-						buffers.push(chunk);
-						len += chunk.length;
-					});
-					response.on('end', function() {
-						self.running = true;
-						self.timeoutId = setTimeout(function() { self.doWork(); }, settings.retryInterval);
-					});
-				});
-				reqPage.on('socket', function (socket) {
-					socket.setTimeout(timeout);
-					socket.on('timeout', function () {
-						reqPage.abort();
-					})
-				});
-				reqPage.on('error', function (err) {
-					++stat.errors;
-					stat.last_error = 'Failed to fetch supply page (Internal Server Error).'
-					setTimeout(function () { self.start(); }, retryLoginTime);
-				});
-				reqPage.end();
-			}
-		});
-	}
+			});
+			reqPage.end();
+		}
+	});
 };
 Worker.prototype.stop = function stop () {
 	if (this.timeoutId) clearTimeout(this.timeoutId);
