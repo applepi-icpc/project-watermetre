@@ -170,6 +170,30 @@ $(function () {
 		app.nowPassword = $('input[name=query_password]').val();
 
 		// TODO: Retrieve data from server
+		$('#cmdRemoveAll').click(function() {
+			app.alert('Loading...', true);
+			$.ajax({
+				url: '/courses',
+				type: 'GET',
+				data: {
+					username: app.nowUserName,
+					password: app.nowPassword
+				}
+				dataType: 'json',
+				timeout: 45000,
+				context: this,
+				error: function (jqXHR, textStatus, err) {
+					if (jqXHR.status == 500) {
+						app.alert('Task error: ' + JSON.parse(jqXHR.responseText).error + ' (Status: ' + err + ')');
+					} else {
+						app.alert('Task error: ' + err);
+					}
+				},
+				success: function (data) {
+					app.classes.reset(data);
+				}
+			});
+		});
 	});
 
 	// Deselect All
