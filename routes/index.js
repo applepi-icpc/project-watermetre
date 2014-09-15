@@ -66,7 +66,7 @@ router.get('/courses', function(req, res) {
 		res.status(400);
 		res.json({error: "Don't inquiry edge's courses!"});
 	} else {
-		User.login(req.body.username, req.body.password, function (err, statusCode, user) {
+		User.login(req.query.username, req.query.password, function (err, statusCode, user) {
 			if (statusCode != 201) {
 				res.status(statusCode);
 				res.json({error: err});

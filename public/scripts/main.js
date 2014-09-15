@@ -190,6 +190,7 @@ $(function () {
 			},
 			success: function (data) {
 				app.classes.reset(data);
+				app.hideAlert();
 			}
 		});
 	});
