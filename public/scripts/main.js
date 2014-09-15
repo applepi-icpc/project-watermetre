@@ -6,6 +6,7 @@ app.nowPassword = null;
 var animationDuration = 500;
 
 $(function () {
+	app.updateSatelliteNumber();
 	$('#newCommand').hide();
 
 	// * All

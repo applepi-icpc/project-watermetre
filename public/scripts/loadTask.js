@@ -1,5 +1,7 @@
 var app = app || {};
 
+var refreshInterval = 60000;
+
 app.loadTask = function (callback) {
 	app.alert('Loading tasks...', true);
 	app.tasks.fetch({
@@ -12,4 +14,5 @@ app.loadTask = function (callback) {
 			app.alert('Loading error: ' + response.error);
 		}
 	});
+	setTimeout(app.loadTask, refreshInterval);
 };
