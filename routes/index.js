@@ -10,7 +10,7 @@ var Parser = require('../models/parser.js');
 var http = require('http');
 var _ = require('underscore');
 
-var timeout = 10000;
+var timeout = 30000;
 
 /* GET home page. */
 router.get('/', function(req, res) {
@@ -62,11 +62,11 @@ router.get('/stat', function(req, res) {
 
 // Crucial route: Inquiry the candidate courses.
 router.get('/courses', function(req, res) {
-	if (req.body.username == edge) {
+	if (req.body.username == 'edge') {
 		res.status(400);
 		res.json({error: "Don't inquiry edge's courses!"});
 	} else {
-		User.login(req.body.username, req.body.password, function (err, statusCode, user) {
+		User.login(req.query.username, req.query.password, function (err, statusCode, user) {
 			if (statusCode != 201) {
 				res.status(statusCode);
 				res.json({error: err});
@@ -98,7 +98,7 @@ router.get('/courses', function(req, res) {
 							return res.json({error: err});
 						}
 
-						if (tot.isNaN()) {
+						if (isNaN(tot)) {
 							res.status(500);
 							return res.json({error: "Page number is NaN."});
 						}
@@ -146,7 +146,11 @@ router.get('/courses', function(req, res) {
 							reqAp.end();
 						};
 
-						append(1);
+						if (tot >= 2) append(1);
+						else {
+							res.status(200);
+							return res.json(cl);
+						}
 					});
 				});
 				reqPage.on('socket', function (socket) {

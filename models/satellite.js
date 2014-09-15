@@ -7,7 +7,7 @@ var exports = {};
 module.exports = exports;
 
 var expireTime = 20000; // ms
-var timeout = 15000; // ms
+var timeout = 30000; // ms
 
 exports.lastHeartbeat = {}; // stores ip => lastHeartbeat (Unix time)
 exports.lastHeartbeat[settings.hostIP] = new Date().getTime();

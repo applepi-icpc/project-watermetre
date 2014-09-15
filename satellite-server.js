@@ -11,7 +11,7 @@ var settings = require('./settings.js');
 var heartbeatInterval = 5000; // ms;
 
 // Timeout.
-var timeout = 10000; // ms
+var timeout = 15000; // ms
 
 // Home planet's host.
 var host = 'www.watermetre.net';

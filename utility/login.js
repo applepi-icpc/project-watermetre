@@ -2,7 +2,7 @@ var http = require('http');
 var https = require('https');
 var querystring = require('querystring');
 
-var timeout = 10000;
+var timeout = 30000;
 
 var exports = [];
 module.exports = exports;

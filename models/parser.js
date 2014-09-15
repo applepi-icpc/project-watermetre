@@ -63,6 +63,7 @@ exports.parseList = function (s) {
 	while (p != -1) {
 		res.push(exports.parseClass(s.substr(p)));
 		s = s.substr(p + 1);
+		p = s.search(tokenClassBegin);
 		var e = s.search('datagrid-footer');
 		if (p >= e) break;
 	}
