@@ -75,9 +75,9 @@ exports.sendRequest = function (jsessionid, seq, index, ubound, taskId, callback
 			var lat = new Date().getTime() - now;
 
 			if (!latency[satellite]) {
-				latency[satellite] = lat;
+				exports.latency[satellite] = lat;
 			} else {
-				latency[satellite] = latency[satellite] * 0.6667 + lat * 0.3333;
+				exports.latency[satellite] = exports.latency[satellite] * 0.6667 + lat * 0.3333;
 			}
 
 			console.log('From satellite ' + satellite + ': (' + lat + ' ms)');

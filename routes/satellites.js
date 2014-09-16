@@ -18,7 +18,7 @@ router.post('/heartbeat', function (req, res) {
 router.get('/', function (req, res) {
 	var ori = Satellite.lastHeartbeat;
 	var ret = []
-	_.each(ret, function (beatTime, satellite) {
+	_.each(ori, function (beatTime, satellite) {
 		ret.push({
 			ip: satellite,
 			lastBeat: beatTime,
