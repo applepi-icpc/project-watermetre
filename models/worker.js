@@ -16,6 +16,7 @@ function Worker(worker) {
 	this.password = worker.password;
 	this.index = worker.index;
 	this.seq = worker.seq;
+	this.launched = false;
 	this.running = false;
 	this.timeoutId = null;
 
@@ -75,22 +76,37 @@ Worker.prototype.doWork = function doWork () {
 		}
 	});
 };
-Worker.prototype.start = function start () {
+Worker.prototype.start = function start (rep) {
 	var self = this;
 	self.consecutiveError = 0;
 
 	// For debug
-	console.log('[START] ' + self.user_id + ' ' + self.seq);
+	console.log('[START' + (rep ? ' REP' : '') + '] ' + self.user_id + ' ' + self.seq);
+
+	if (rep) {
+		if (!self.launched) {
+			console.log('[START REP] ' + self.user_id + ' has suspended.');
+			return;
+		}
+	} else {
+		self.launched = true;
+	}
+	if (self.running) {
+		console.log('[START] ' + self.user_id + ' has already bugun.');
+		return;
+	}
 
 	// If login failed, change tasks' status to paused.
 	User.login(self.user_id, self.password, function(err, statusCode, user) {
+		if (self.running) return;
+
 		self.task.ensureStat();
 		var stat = self.task.getStat();
 
 		if (statusCode == 500) { // Internal Server Error
 			++stat.errors;
 			stat.last_error = 'Failed to login (Internal Server Error).';
-			setTimeout(function () { self.start(); }, retryLoginTime);
+			setTimeout(function () { self.start(true); }, retryLoginTime);
 		} else if (statusCode == 403) { // Wrong user ID || Password
 			++stat.errors;
 			stat.last_error = 'Wrong user ID or password.';
@@ -107,6 +123,7 @@ Worker.prototype.start = function start () {
 			}, function (response) {
 				response.on('data', function() {});
 				response.on('end', function() {
+					if (self.running) return;
 					self.running = true;
 					self.timeoutId = setTimeout(function() { self.doWork(); }, settings.retryInterval);
 				});
@@ -120,7 +137,7 @@ Worker.prototype.start = function start () {
 			reqPage.on('error', function (err) {
 				++stat.errors;
 				stat.last_error = 'Failed to fetch supply page (Internal Server Error).'
-				setTimeout(function () { self.start(); }, retryLoginTime);
+				setTimeout(function () { self.start(true); }, retryLoginTime);
 			});
 			reqPage.end();
 		}
@@ -130,4 +147,5 @@ Worker.prototype.stop = function stop () {
 	if (this.timeoutId) clearTimeout(this.timeoutId);
 	this.timeoutId = null;
 	this.running = false;
+	this.launched = false;
 }

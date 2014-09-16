@@ -9,11 +9,15 @@ module.exports = exports;
 
 // callback(error, jsessionid)
 exports.login = function (username, password, callback) {
+	// To prevent the weird condition that callback is not work.
+	var lockS1 = setTimeout(function() { callback('Timeout.'); }, timeout);
+
 	var reqSsoLogin = https.request({
 		hostname: 'iaaa.pku.edu.cn',
 		path: '/iaaa/oauth.jsp?appID=syllabus&appName=学生选课系统&redirectUrl=http://elective.pku.edu.cn:80/elective2008/agent4Iaaa.jsp/../ssoLogin.do',
 		method: 'GET'
 	}, function (response) {
+		clearTimeout(lockS1);
 		var jsessionid = response.headers['set-cookie'][0].match(/JSESSIONID=([^;]+)/)[1];
 		reqSsoLogin.abort();
 
