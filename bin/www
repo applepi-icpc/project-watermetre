@@ -7,6 +7,7 @@ var https = require('https');
 var url = require('url');
 var privateKey = fs.readFileSync('ssl_decrypted.key', 'utf8');
 var certificate = fs.readFileSync('ssl.crt', 'utf8');
+var intermediate = fs.readFileSync('sub.class1.server.ca.pem', 'utf8');
 
 var Task = require('../models/task.js');
 var Db = require('../models/db.js');
@@ -17,7 +18,7 @@ app.set('port', process.env.PORT || 3000);
   debug('Express server listening on port ' + server.address().port);
 }); */
 
-var cred = {key: privateKey, cert: certificate};
+var cred = {key: privateKey, cert: certificate, ca: [ intermediate ]};
 
 Db.initialize(function (err) {
 	if (!err) {
