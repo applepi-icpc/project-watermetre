@@ -14,8 +14,32 @@ router.post('/heartbeat', function (req, res) {
 });
 
 router.get('/', function (req, res) {
+	var ori = Satellite.lastHeartbeat;
+	var ret = []
+	_.each(ret, function (beatTime, satellite) {
+		ret.push({
+			ip: satellite,
+			lastBeat: beatTime,
+			latency: Satellite.latency[satellite],
+			paused: Satellite.pause[satellite] ? true : false
+		});
+	});
 	res.status(200);
-	return res.json(Satellite.lastHeartbeat);
+	return res.json(ret);
+});
+
+router.put('/pause/:ip', Users.checkSuperuser);
+router.put('/pause/:ip', function (req, res) {
+	Satellite.pause[req.params.ip] = true;
+	res.status(201);
+	return res.json({});
+});
+
+router.delete('/pause/:ip', Users.checkSuperuser);
+router.delete('/pause/:ip', function (req, res) {
+	delete Satellite.pause[req.params.ip];
+	res.status(204);
+	return res.json({});
 });
 
 module.exports = router;

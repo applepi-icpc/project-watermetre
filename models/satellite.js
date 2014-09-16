@@ -2,14 +2,20 @@ var http = require('http');
 var settings = require('../settings.js');
 var identifier = require('../utility/identify.js');
 var crypto = require('crypto');
+var _ = require('underscore');
+
+var User = require('../models/user.js');
 
 var exports = {};
 module.exports = exports;
 
 var expireTime = 20000; // ms
-var timeout = 30000; // ms
+var timeout = 10000; // ms
 
 exports.lastHeartbeat = {}; // stores ip => lastHeartbeat (Unix time)
+exports.latency = {}; // ip => latancy (milliseconds)
+exports.pause = {};
+
 exports.lastHeartbeat[settings.hostIP] = new Date().getTime();
 exports.queue = [ settings.hostIP ]; // stores ip
 
@@ -17,14 +23,24 @@ exports.queue = [ settings.hostIP ]; // stores ip
 exports.sendRequest = function (jsessionid, seq, index, ubound, callback) {
 	var satellite;
 	var now = new Date().getTime();
+	var tque = []
 	while (exports.queue.length > 0) {
 		satellite = exports.queue.shift();
-		if (now - exports.lastHeartbeat[satellite] <= expireTime) break;
+		if (exports.pause[satellite]) {
+			tque.push(satellite);
+		}
+		else if (now - exports.lastHeartbeat[satellite] <= expireTime) break;
 		else {
 			delete exports.lastHeartbeat[satellite];
+			delete exports.latency[satellite];
 			satellite = undefined;
 		}
+
 	}
+	_.each(tque, function (sate) {
+		queue.push(sate);
+	});
+	tque = [];
 	if (!satellite) {
 		return callback('No avaliable satellites.');
 	}
@@ -55,8 +71,15 @@ exports.sendRequest = function (jsessionid, seq, index, ubound, callback) {
 		});
 		response.on('end', function () {
 			var res = JSON.parse(Buffer.concat(buffers, len).toString('utf8'));
-			var tNow = new Date().getTime();
-			console.log('From satellite ' + satellite + ': (' + (tNow - now) + ' ms)');
+			var lat = new Date().getTime() - now;
+
+			if (!latency[satellite]) {
+				latency[satellite] = lat;
+			} else {
+				latency[satellite] = latency[satellite] * 0.6667 + lat * 0.3333;
+			}
+
+			console.log('From satellite ' + satellite + ': (' + lat + ' ms)');
 			console.log(res);
 
 			identifier.tried += res.correct + res.wrong;
