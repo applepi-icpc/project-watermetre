@@ -1,6 +1,8 @@
 var express = require('express');
 var router = express.Router();
 var identifier = require('../utility/identify.js');
+var Users = require('./users.js');
+var Task = require('../models/task.js');
 
 var Satellite = require('../models/satellite.js');
 var _ = require('underscore');
@@ -31,18 +33,24 @@ router.get('/', function (req, res) {
 });
 
 router.post('/sendFailed', function (req, res) {
-	identifier.tried += req.body.correct + req.body.error;
-	identifier.correct += req.body.correct;
-	identifier.error += req.body.error;
+	var correct = parseInt(req.body.correct);
+	var wrong = parseInt(req.body.wrong);
+
+	identifier.tried += correct + wrong;
+	identifier.correct += correct;
+	identifier.wrong += wrong;
 
 	res.status(201);
 	return res.json({});
 });
 
 router.post('/sendOK/:taskId', function (req, res) {
-	identifier.tried += req.body.correct + req.body.error;
-	identifier.correct += req.body.correct;
-	identifier.error += req.body.error;
+	var correct = parseInt(req.body.correct);
+	var wrong = parseInt(req.body.wrong);
+
+	identifier.tried += correct + wrong;
+	identifier.correct += correct;
+	identifier.wrong += wrong;
 
 	Task.get(req.params.taskId, function (err, task) {
 		if (err) {

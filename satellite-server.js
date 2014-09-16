@@ -6,6 +6,7 @@ var url = require('url');
 var identifier = require('./utility/identify.js');
 var crypto = require('crypto');
 var settings = require('./settings.js');
+var querystring = require('querystring');
 
 // Heartbeat interval.
 var heartbeatInterval = 5000; // ms;
@@ -24,10 +25,13 @@ var retryIdentifyTime = 500; // ms
 // process.on('uncaughtException', function (err) {});
 
 // Send back.
-var sendOK = function (taskId, correct, error) {
+var sendOK = function (taskId, correct, wrong) {
 	var req = https.request({
 		hostname: host,
 		path: '/satellites/sendOK/' + taskId,
+		headers: {
+			'Content-Type': 'application/x-www-form-urlencoded'
+		},
 		method: 'POST',
 		rejectUnauthorized: false
 	}, function (response) {
@@ -44,14 +48,17 @@ var sendOK = function (taskId, correct, error) {
 	});
 	req.write(querystring.stringify({
 		correct: correct,
-		error: error
+		wrong: wrong
 	}));
 	req.end();
 }
-var sendFailed = function (correct, error) {
+var sendFailed = function (correct, wrong) {
 	var req = https.request({
 		hostname: host,
 		path: '/satellites/sendFailed',
+		headers: {
+			'Content-Type': 'application/x-www-form-urlencoded'
+		},
 		method: 'POST',
 		rejectUnauthorized: false
 	}, function (response) {
@@ -68,7 +75,7 @@ var sendFailed = function (correct, error) {
 	});
 	req.write(querystring.stringify({
 		correct: correct,
-		error: error
+		wrong: wrong
 	}));
 	req.end();
 }
@@ -119,7 +126,7 @@ http.createServer(function(req, res) {
 						if (retried < maxRetry) {
 							setTimeout(workFunction, retryIdentifyTime, retried + 1);
 						} else {
-							sendFailed(correct, error);
+							sendFailed(correct, wrong);
 						}
 					} else {
 						++correct;
@@ -143,9 +150,9 @@ http.createServer(function(req, res) {
 
 								if (resBody.search('success.gif') != -1) {
 									// Yeeeeeeeeeeeeeeaaaaaaaaaaaaaaaaaah!!!
-									sendOK(workObject.taskId, correct, error);
+									sendOK(workObject.taskId, correct, wrong);
 								} else {
-									sendFailed(correct, error);
+									sendFailed(correct, wrong);
 								}
 							});
 						});

@@ -74,7 +74,7 @@ exports.sendRequest = function (jsessionid, seq, index, ubound, taskId, callback
 			var res = JSON.parse(Buffer.concat(buffers, len).toString('utf8'));
 			var lat = new Date().getTime() - now;
 
-			if (!latency[satellite]) {
+			if (!exports.latency[satellite]) {
 				exports.latency[satellite] = lat;
 			} else {
 				exports.latency[satellite] = exports.latency[satellite] * 0.6667 + lat * 0.3333;

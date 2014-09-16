@@ -55,7 +55,10 @@ Worker.prototype.work = function work (callback) {
 		} else if (status == 'OK') {
 			self.consecutiveError = 0;
 			if (self.running) {
-				self.timeoutId = setTimeout(function() { self.doWork(); }, supplementTimeout);
+				self.timeoutId = setTimeout(function() { 
+					stat.last_error = "Message: Refresh restarted.";
+					self.doWork(); 
+				}, supplementTimeout);
 			}
 			return callback(null, true);
 		} else {
@@ -70,6 +73,7 @@ Worker.prototype.work = function work (callback) {
 };
 Worker.prototype.doWork = function doWork () {
 	var self = this;
+	if (!self.running) return;
 	self.task.ensureStat();
 	var stat = self.task.getStat();
 	self.work(function(err, ended) {
@@ -132,7 +136,7 @@ Worker.prototype.start = function start (rep) {
 			}, function (response) {
 				response.on('data', function() {});
 				response.on('end', function() {
-					if (self.running) return;
+					if (self.running || !self.launched) return;
 					self.running = true;
 					self.timeoutId = setTimeout(function() { self.doWork(); }, settings.retryInterval);
 				});
