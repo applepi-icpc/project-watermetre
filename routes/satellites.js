@@ -1,5 +1,7 @@
 var express = require('express');
 var router = express.Router();
+var identifier = require('../utility/identify.js');
+
 var Satellite = require('../models/satellite.js');
 var _ = require('underscore');
 
@@ -26,6 +28,32 @@ router.get('/', function (req, res) {
 	});
 	res.status(200);
 	return res.json(ret);
+});
+
+router.post('/sendFailed', function (req, res) {
+	identifier.tried += req.body.correct + req.body.error;
+	identifier.correct += req.body.correct;
+	identifier.error += req.body.error;
+
+	res.status(201);
+	return res.json({});
+});
+
+router.post('/sendOK/:taskId', function (req, res) {
+	identifier.tried += req.body.correct + req.body.error;
+	identifier.correct += req.body.correct;
+	identifier.error += req.body.error;
+
+	Task.get(req.params.taskId, function (err, task) {
+		if (err) {
+			res.status(500);
+			return res.json({error: err});
+		} else {
+			task.succeed();
+			res.status(201);
+			return res.json({});
+		}
+	});
 });
 
 router.put('/pause/:ip', Users.checkSuperuser);

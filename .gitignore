@@ -4,4 +4,4 @@ ssl*
 .DS_Store
 settings.js
 node_modules/
-
+*.pem

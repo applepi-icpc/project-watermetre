@@ -17,11 +17,61 @@ var timeout = 15000; // ms
 var host = 'www.watermetre.net';
 
 // Retrying options.
-var maxRetry = 10;
+var maxRetry = 5;
 var retryIdentifyTime = 500; // ms
 
 // For simplifying, ignore all uncaught exceptions.
 // process.on('uncaughtException', function (err) {});
+
+// Send back.
+var sendOK = function (taskId, correct, error) {
+	var req = https.request({
+		hostname: host,
+		path: '/satellites/sendOK/' + taskId,
+		method: 'POST',
+		rejectUnauthorized: false
+	}, function (response) {
+		req.abort();
+	});
+	req.on('socket', function (socket) {
+		socket.setTimeout(timeout);
+		socket.on('timeout', function () {
+			req.abort();
+		});
+	});
+	req.on('error', function(err) {
+		// Simply ignore the error.
+	});
+	req.write(querystring.stringify({
+		correct: correct,
+		error: error
+	}));
+	req.end();
+}
+var sendFailed = function (correct, error) {
+	var req = https.request({
+		hostname: host,
+		path: '/satellites/sendFailed',
+		method: 'POST',
+		rejectUnauthorized: false
+	}, function (response) {
+		req.abort();
+	});
+	req.on('socket', function (socket) {
+		socket.setTimeout(timeout);
+		socket.on('timeout', function () {
+			req.abort();
+		});
+	});
+	req.on('error', function(err) {
+		// Simply ignore the error.
+	});
+	req.write(querystring.stringify({
+		correct: correct,
+		error: error
+	}));
+	req.end();
+}
 
 // POST / with {jsessionid, seq, index}
 http.createServer(function(req, res) {
@@ -58,26 +108,21 @@ http.createServer(function(req, res) {
 
 			// result: OK, Full, Expired, RetriedTooMany, Error
 			var result = {};
-			result.wrong = 0;
-			result.correct = 0;
+			var correct = 0, wrong = 0;
 
 			var workFunction = function (retried) {
 				identifier.tryIdentify(workObject.jsessionid, function (err, success) {
-					if (err == 'Session expired.') {
-						result.status = 'Expired';
-						return resFunction(result);
-					} else if (err || !success) {
+					if (err || !success) {
 						if (!err) {
-							++result.wrong;
+							++wrong;
 						}
 						if (retried < maxRetry) {
 							setTimeout(workFunction, retryIdentifyTime, retried + 1);
 						} else {
-							result.status = 'RetriedTooMuch';
-							return resFunction(result);
+							sendFailed(correct, error);
 						}
 					} else {
-						++result.correct;
+						++correct;
 
 						var reqSupplement = http.request({
 							hostname: 'elective.pku.edu.cn',
@@ -98,21 +143,10 @@ http.createServer(function(req, res) {
 
 								if (resBody.search('success.gif') != -1) {
 									// Yeeeeeeeeeeeeeeaaaaaaaaaaaaaaaaaah!!!
-									result.status = 'OK';
+									sendOK(workObject.taskId, correct, error);
 								} else {
-									var msg = resBody.match(/<label class=\'message_error\'>(.*?)<\/label>/);
-									if (!msg) {
-										result.status = 'Error';
-										result.err = 'Server denied.';
-									} else if (msg[1] == '该课程选课人数已满。') {
-										result.status = 'Full';
-									} else {
-										result.status = 'Error';
-										result.err = msg;
-									}
+									sendFailed(correct, error);
 								}
-
-								return resFunction(result);
 							});
 						});
 						reqSupplement.on('socket', function (socket) {
@@ -160,7 +194,9 @@ http.createServer(function(req, res) {
 						} else {
 							var elected = parseInt(match[1]);
 							if (elected != workObject.ubound) {
-								workFunction(0);
+								result.status = 'OK';
+								resFunction(result);
+								return workFunction(0);
 							} else {
 								result.status = 'Full';
 								return resFunction(result);

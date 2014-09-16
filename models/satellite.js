@@ -20,7 +20,7 @@ exports.lastHeartbeat[settings.hostIP] = new Date().getTime();
 exports.queue = [ settings.hostIP ]; // stores ip
 
 // callback(err, status)
-exports.sendRequest = function (jsessionid, seq, index, ubound, callback) {
+exports.sendRequest = function (jsessionid, seq, index, ubound, taskId, callback) {
 	var satellite;
 	var now = new Date().getTime();
 	var tque = []
@@ -50,7 +50,8 @@ exports.sendRequest = function (jsessionid, seq, index, ubound, callback) {
 		jsessionid: jsessionid,
 		seq: seq,
 		index: index,
-		ubound: ubound
+		ubound: ubound,
+		taskId: taskId
 	});
 	var cipher = crypto.createCipher('aes192', settings.edgePassword);
 	var toSend = cipher.update(plain, 'utf8', 'base64');
@@ -81,10 +82,6 @@ exports.sendRequest = function (jsessionid, seq, index, ubound, callback) {
 
 			console.log('From satellite ' + satellite + ': (' + lat + ' ms)');
 			console.log(res);
-
-			identifier.tried += res.correct + res.wrong;
-			identifier.correct += res.correct;
-			identifier.wrong += res.wrong;
 
 			if (res.status == 'OK') {
 				return callback(null, 'OK');

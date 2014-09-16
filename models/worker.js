@@ -11,6 +11,9 @@ var retryIdentifyTime = 500; // ms
 var maxConsecutiveError = 3;
 var timeout = 15000;
 
+// If satellites reports OK, wait it sends supplemented or refresh again.
+var supplementTimeout = 30000;
+
 function Worker(worker) {
 	this.user_id = worker.user_id;
 	this.password = worker.password;
@@ -38,7 +41,7 @@ Worker.prototype.work = function work (callback) {
 	self.task.ensureStat();
 	var stat = self.task.getStat();
 
-	Satellite.sendRequest(self.jsessionid, self.seq, self.index, self.ubound, function (err, status) {
+	Satellite.sendRequest(self.jsessionid, self.seq, self.index, self.ubound, self.task._id, function (err, status) {
 		if (err || status == 'Expired') {
 			++self.consecutiveError;
 			if (self.consecutiveError > maxConsecutiveError) {
@@ -51,6 +54,9 @@ Worker.prototype.work = function work (callback) {
 			else return callback(err, false);
 		} else if (status == 'OK') {
 			self.consecutiveError = 0;
+			if (self.running) {
+				self.timeoutId = setTimeout(function() { self.doWork(); }, supplementTimeout);
+			}
 			return callback(null, true);
 		} else {
 			self.consecutiveError = 0;
@@ -73,7 +79,9 @@ Worker.prototype.doWork = function doWork () {
 			stat.last_error = err.toString();
 		} 
 		if (ended) {
-			self.task.succeed();
+			// Wait satellites to do such thing.
+			// self.task.succeed();
+			stat.last_error = 'Message: Supplementing...';
 		}
 	});
 };
