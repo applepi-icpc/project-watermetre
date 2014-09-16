@@ -14,7 +14,7 @@ exports.lastHeartbeat[settings.hostIP] = new Date().getTime();
 exports.queue = [ settings.hostIP ]; // stores ip
 
 // callback(err, status)
-exports.sendRequest = function (jsessionid, seq, index, callback) {
+exports.sendRequest = function (jsessionid, seq, index, ubound, callback) {
 	var satellite;
 	var now = new Date().getTime();
 	while (exports.queue.length > 0) {
@@ -33,12 +33,14 @@ exports.sendRequest = function (jsessionid, seq, index, callback) {
 	var plain = JSON.stringify({
 		jsessionid: jsessionid,
 		seq: seq,
-		index: index
+		index: index,
+		ubound: ubound
 	});
 	var cipher = crypto.createCipher('aes192', settings.edgePassword);
 	var toSend = cipher.update(plain, 'utf8', 'base64');
 	toSend += cipher.final('base64');
 
+	var now = new Date().getTime();
 	var req = http.request({
 		host: satellite,
 		port: 3333,
@@ -53,7 +55,8 @@ exports.sendRequest = function (jsessionid, seq, index, callback) {
 		});
 		response.on('end', function () {
 			var res = JSON.parse(Buffer.concat(buffers, len).toString('utf8'));
-			console.log('From satellite ' + satellite + ': ');
+			var tNow = new Date().getTime();
+			console.log('From satellite ' + satellite + ': (' + (tNow - now) + ' ms)');
 			console.log(res);
 
 			identifier.tried += res.correct + res.wrong;

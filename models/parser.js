@@ -7,6 +7,7 @@ var tokenClassBegin = '<td class="datagrid"><a href="/elective2008/edu/pku/stu/e
 var reName = /<span>(.*?)<\/span>/i;
 var reThGr = /<td class="datagrid"><span style="width: 90">(.*?)<\/span><\/td>\s*<td class="datagrid" align="center"><span style="width: 30">(.*?)<\/span>/i;
 var reTime = /<td class="datagrid"><span style="width: 200">(.*?)<\/span>/i;
+var reUBound = /<span id="electedNum\d*?" style="width: 60">(\d+?) \/ \d+?/i;
 var reCommand = /<td class="datagrid" align="center"><a (.)/i;
 var reElect = /"\/elective2008\/edu\/pku\/stu\/elective\/controller\/supplement\/electSupplement.do\?index=(.*?)&amp;seq=(.*?)"/i;
 var reRefresh = /javascript:refreshLimit\('.*?','.*?','.*?','(.*?)','(.*?)','.*?'\);/i;
@@ -31,6 +32,12 @@ exports.parseClass = function (s) {
 		throw "Error when parsing teacher name."
 	}
 	ret.teacher = match[1];
+
+	match = s.match(reUBound);
+	if (!match) {
+		throw "Error when parsing upper bound."
+	}
+	ret.ubound = match[1];
 
 	match = s.match(reTime);
 	if (!match) {

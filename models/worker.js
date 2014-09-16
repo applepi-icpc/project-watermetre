@@ -16,6 +16,7 @@ function Worker(worker) {
 	this.password = worker.password;
 	this.index = worker.index;
 	this.seq = worker.seq;
+	this.ubound = worker.ubound;
 	this.launched = false;
 	this.running = false;
 	this.timeoutId = null;
@@ -37,7 +38,7 @@ Worker.prototype.work = function work (callback) {
 	self.task.ensureStat();
 	var stat = self.task.getStat();
 
-	Satellite.sendRequest(self.jsessionid, self.seq, self.index, function (err, status) {
+	Satellite.sendRequest(self.jsessionid, self.seq, self.index, self.ubound, function (err, status) {
 		if (err || status == 'Expired') {
 			++self.consecutiveError;
 			if (self.consecutiveError > maxConsecutiveError) {

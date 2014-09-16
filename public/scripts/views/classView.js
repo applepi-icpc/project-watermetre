@@ -26,6 +26,7 @@ var ClassView = Backbone.View.extend({
 		this.$el.data('attachedClass', {
 			index: this.class.get('index'),
 			seq: this.class.get('seq'),
+			ubound: this.class.get('ubound'),
 			className: this.class.get('name')
 		});
 	},

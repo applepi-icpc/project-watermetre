@@ -6,6 +6,7 @@ app.Class = Backbone.Model.extend({
 		teacher: '',
 		msg: '',
 		seq: '',
+		ubound: 0,
 		index: -1
 	}
 });

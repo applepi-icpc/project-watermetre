@@ -68,7 +68,6 @@ http.createServer(function(req, res) {
 						return resFunction(result);
 					} else if (err || !success) {
 						if (!err) {
-							console.log('WRONG');
 							++result.wrong;
 						}
 						if (retried < maxRetry) {
@@ -120,7 +119,7 @@ http.createServer(function(req, res) {
 							socket.setTimeout(timeout);
 							socket.on('timeout', function () {
 								reqSupplement.abort();
-							})
+							});
 						});
 						reqSupplement.on('error', function (err) {
 							result.status = 'Error';
@@ -131,8 +130,58 @@ http.createServer(function(req, res) {
 					}
 				});
 			};
+		
+			var refreshFunction = function (retried) {
+				var reqRefresh = http.request({
+					hostname: 'elective.pku.edu.cn',
+					path: '/elective2008/edu/pku/stu/elective/controller/supplement/refreshLimit.do?index=' + workObject.index + '&seq=' + workObject.seq,
+					headers: {
+						'Cookie': 'JSESSIONID=' + workObject.jsessionid
+					},
+					method: 'GET'
+				}, function (response) {
+					var buffers = [];
+					var len = 0;
+					response.on('data', function (chunk) {
+						buffers.push(chunk);
+						len += chunk.length;
+					});
+					response.on('end', function () {
+						var resBody = Buffer.concat(buffers, len).toString('utf8');
 
-			workFunction(0);
+						var match = resBody.match(/<electedNum>(\d+)<\/electedNum>/i);
+						if (!match) {
+							if (retried < maxRetry) {
+								setTimeout(refreshFunction, retryIdentifyTime, retried + 1);
+							} else {
+								result.status = 'RetriedTooMuch';
+								return resFunction(result);
+							}
+						} else {
+							var elected = parseInt(match[1]);
+							if (elected != workObject.ubound) {
+								workFunction(0);
+							} else {
+								result.status = 'Full';
+								return resFunction(result);
+							}
+						}
+					});
+				});
+				reqRefresh.on('socket', function (socket) {
+					socket.setTimeout(timeout);
+					socket.on('timeout', function () {
+						reqRefresh.abort();
+					});
+				});
+				reqRefresh.on('error', function (err) {
+					result.status = 'Error';
+					result.err = 'Refresh error.';
+				});
+				reqRefresh.end();
+			};
+
+			refreshFunction(0);
 		});
 	}
 }).listen(3333);

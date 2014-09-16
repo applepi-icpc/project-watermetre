@@ -23,6 +23,7 @@ function Task(task) {
 		var newClass = {
 			index: element.index,
 			seq: element.seq,
+			ubound: element.ubound,
 			className: element.className
 		};
 		this.classes.push(newClass);
@@ -115,6 +116,7 @@ Task.prototype.createWorkers = function createWorkers() {
 				password: this.password,
 				index: cl.index,
 				seq: cl.seq,
+				ubound: cl.ubound,
 				task: this
 			});
 			workerHash[this._id].push(worker);
