@@ -5,6 +5,7 @@ app.Satellite = Backbone.Model.extend({
 	defaults: {
 		ip: '',
 		paused: false,
+		isHost: false,
 		lastBeat: 0,
 		latency: -1
 	},

@@ -233,7 +233,10 @@ div.satellite {
 	margin: 10px 0;
 
 	background: url(../images/satellite.png) no-repeat center left;
-	background-size: 80px 50px;
+	background-size: 80px 60px;
+}
+div.satellite.host {
+	background-image: url(../images/host.png);
 }
 div.satellite div,ip {
 	font-size: 20px;

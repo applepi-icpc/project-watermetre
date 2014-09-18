@@ -1,6 +1,7 @@
 var express = require('express');
 var router = express.Router();
 var identifier = require('../utility/identify.js');
+var settings = require('../settings.js');
 var Users = require('./users.js');
 var Task = require('../models/task.js');
 
@@ -25,7 +26,8 @@ router.get('/', function (req, res) {
 			ip: satellite,
 			lastBeat: beatTime,
 			latency: Satellite.latency[satellite] || -1,
-			paused: Satellite.pause[satellite] ? true : false
+			paused: Satellite.pause[satellite] ? true : false,
+			isHost: satellite == settings.hostIP
 		});
 	});
 	res.status(200);

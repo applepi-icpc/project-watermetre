@@ -39,6 +39,11 @@ var SatelliteView = Backbone.View.extend({
 		} else {
 			this.$el.removeClass('paused');
 		}
+		if (satellite.get('isHost')) {
+			this.$el.addClass('host');
+		} else {
+			this.$el.removeClass('host');
+		}
 		return this;
 	},
 
