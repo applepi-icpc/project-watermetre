@@ -24,7 +24,7 @@ router.get('/', function (req, res) {
 		ret.push({
 			ip: satellite,
 			lastBeat: beatTime,
-			latency: Satellite.latency[satellite],
+			latency: Satellite.latency[satellite] || -1,
 			paused: Satellite.pause[satellite] ? true : false
 		});
 	});
@@ -73,7 +73,9 @@ router.put('/pause/:ip', function (req, res) {
 
 router.delete('/pause/:ip', Users.checkSuperuser);
 router.delete('/pause/:ip', function (req, res) {
-	delete Satellite.pause[req.params.ip];
+	if (Satellite.pause[req.params.ip]) {
+		delete Satellite.pause[req.params.ip];
+	}
 	res.status(204);
 	return res.json({});
 });

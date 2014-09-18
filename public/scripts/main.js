@@ -7,7 +7,6 @@ var animationDuration = 500;
 
 $(function () {
 	app.updateSatelliteNumber();
-	$('#newCommand').hide();
 
 	// * All
 	$('#cmdStartAll').click(function() {
@@ -94,10 +93,49 @@ $(function () {
 		});
 	});
 
+	// View Satellites
+	$('#viewSatellites').click(function () {
+		$.when(
+			$('#taskCommand').fadeOut(animationDuration),
+			$('#newCommand').fadeOut(animationDuration),
+			$('#viewSatellites').fadeOut(animationDuration)
+		).done(function() {
+			$('#hideSatellites').fadeIn(animationDuration, function () {
+				$('.nano').nanoScroller();
+			});
+		});
+		$.when(
+			$('#tasks').fadeOut(animationDuration),
+			$('#newtask').fadeOut(animationDuration)
+		).done(function () {
+			$('#satellites').fadeIn(animationDuration, function () {
+				$('.nano').nanoScroller();
+			});
+		});
+	});
+
+	// Hide Satellites
+	$('#hideSatellites').click(function () {
+		$('#hideSatellites').fadeOut(animationDuration, function () {
+			$('#viewSatellites').fadeIn(animationDuration, function () {
+				$('.nano').nanoScroller();
+			})
+			$('#taskCommand').fadeIn(animationDuration, function () {
+				$('.nano').nanoScroller();
+			})
+		})
+		$('#satellites').fadeOut(animationDuration, function () {
+			$('#tasks').fadeIn(animationDuration, function () {
+				$('.nano').nanoScroller();
+			});
+		});
+	});
+
 	// New Task
 	$('#cmdNewTask').click(function() {
 		app.classes.reset();
 		app.nowUserName = app.nowPassword = null;
+		$('#blkSelectedItem').text('0');
 		$('input[name=query_user_id]').val('');
 		$('input[name=query_password]').val('');
 		$('#taskCommand').fadeOut(animationDuration, function () {

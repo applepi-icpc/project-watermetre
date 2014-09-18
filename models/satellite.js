@@ -38,7 +38,7 @@ exports.sendRequest = function (jsessionid, seq, index, ubound, taskId, callback
 
 	}
 	_.each(tque, function (sate) {
-		queue.push(sate);
+		exports.queue.push(sate);
 	});
 	tque = [];
 	if (!satellite) {

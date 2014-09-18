@@ -42,7 +42,7 @@
 							<div class="command pause" id="cmdSuspendAll">Suspend All</div>
 							<div class="command remove" id="cmdRemoveAll">Remove All</div>
 						</div>
-						<div id="newCommand">
+						<div id="newCommand" class="hidden">
 							<div class="command new" id="cmdOK">OK</div>
 							<div class="command remove" id="cmdCancelNewTask">Cancel</div>
 							<div class="block">
@@ -51,10 +51,12 @@
 							</div>
 							<div class="command other" id="cmdDeselect">Deselect All</div>
 						</div>
+						<div class="command remove hidden" id="hideSatellites">Back To Tasks</div>
 						<div class="block">
 							Satellites
 							<span id="blkSatellites">N/A</span>
 						</div>
+						<div class="command other" id="viewSatellites">View details</div>
 						<div class="block">
 							Milliseconds after retrying
 							<span id="blkRetryTime"><%= retryInterval %></span>
@@ -62,8 +64,8 @@
 						</div>
 						<div class="command other superuser" id="cmdSetRetry">Set 
 						retrying interval</div>
-						<div class="command other superuser" id="cmdSetRetryConfirm">OK</div>
-						<div class="command other superuser" id="cmdSetRetryCancel">Cancel</div>
+						<div class="command other superuser hidden" id="cmdSetRetryConfirm">OK</div>
+						<div class="command other superuser hidden" id="cmdSetRetryCancel">Cancel</div>
 						<div class="block smalltext">
 							Captcha identifying accuracy
 							<span id="blkAccuracy">N/A</span>
@@ -138,6 +140,21 @@
 								</div>
 							</script>
 						</div>
+					</div>
+				</div>
+				<div id="satellites">
+					<h2>Satellites</h2>
+					<div class="board">
+						<script type="text/template" id="satellite-template">
+							{{ if (paused) { }}
+								<div class="satellite-float b-start"></div>
+							{{ } else { }}
+								<div class="satellite-float b-pause"></div>
+							{{ } }}
+							<div class="ip">{{= ip }}</div>
+							<div class="status">{{= status }}</div>
+							<div class="latency">{{= latency }}</div>
+						</script>
 					</div>
 				</div>
 			</div>

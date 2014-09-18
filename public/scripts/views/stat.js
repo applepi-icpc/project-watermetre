@@ -22,24 +22,6 @@ app.fillIdentifyStat = function (tried, correct) {
 	$('#blkIdentified').text(parseNumToKMB(tried));
 };
 
-app.updateSatelliteNumber = function () {
-	$.ajax({
-		url: '/satellites',
-		type: 'GET',
-		dataType: 'json',
-		timeout: 10000,
-		context: this,
-		error: function () {
-			app.alert("Error occured when retrieving satellite data.");
-		},
-		success: function (satellites) {
-			var ss = 0;
-			_.each(satellites, function () { ++ss; });
-			$('#blkSatellites').text(ss);
-		}
-	});
-};
-
 app.updateIdentifyStat = function () {
 	$.ajax({
 		url: '/stat',
@@ -58,7 +40,6 @@ app.updateIdentifyStat = function () {
 
 $(function () {
 	setInterval(app.updateIdentifyStat, updateStatInterval);
-	setInterval(app.updateSatelliteNumber, updateStatInterval);
 
 	$('#cmdResetStat').click(function() {
 		app.alert('Loading...', true);
@@ -78,8 +59,6 @@ $(function () {
 		});
 	});
 
-	$('#cmdSetRetryConfirm').hide();
-	$('#cmdSetRetryCancel').hide();
 	$('#cmdSetRetry').click(function () {
 		$('#cmdSetRetry').hide();
 		$('#cmdSetRetryConfirm').show();

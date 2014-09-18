@@ -134,6 +134,9 @@ div.command span {
 	display: inline-block;
 	margin: 0 1px;
 }
+div.hidden {
+	display: none;
+}
 
 #dashboard div.board div.block {
 	margin: 20px 0 10px 0;
@@ -187,17 +190,17 @@ div.command span {
 	-o-transition: all 300ms; 
 }
 
-#tasks, #newtask {
+#tasks, #newtask, #satellites {
 	width: 775px;
 	padding-top: 160px;
 	margin-left: 225px;
 }
-#tasks h2, #newtask h2 {
+#tasks h2, #newtask h2, #satellites h2 {
 	background: url(../images/tasksBorder.png) no-repeat bottom left;
 	background-size: 311px 1px;
 	padding-bottom: 11px;
 }
-#newtask {
+#newtask, #satellites {
 	display: none;
 }
 

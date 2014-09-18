@@ -25,5 +25,5 @@ app.hideAlert = function hideAlert (duration) {
 };
 
 $('#alert').click(function () {
-	$('#alertWrap').hide();
+	$('#alertWrap').hide(500);
 });
