@@ -146,6 +146,11 @@ div.hidden {
 	-webkit-border-radius: 10px;
 	font-size: 16px;
 	text-align: center;
+
+	transition: all 300ms;
+	-moz-transition: all 300ms;
+	-webkit-transition: all 300ms; 
+	-o-transition: all 300ms; 
 }
 #dashboard div.board div.block.smalltext {
 	font-size: 14px;
@@ -183,11 +188,6 @@ div.hidden {
 	padding: 10px 10px;
 	line-height: 20px;
 	cursor: pointer;
-
-	transition: all 300ms;
-	-moz-transition: all 300ms;
-	-webkit-transition: all 300ms; 
-	-o-transition: all 300ms; 
 }
 
 #tasks, #newtask, #satellites {
@@ -223,6 +223,56 @@ div.class {
 	padding: 5px 5px;
 	line-height: 24px;
 	margin: 10px 0;
+}
+div.satellite {
+	position: relative;
+	display: table;
+	width: auto;
+	height: 60px;
+	padding: 10px 10px 10px 90px;
+	margin: 10px 0;
+
+	background: url(../images/satellite.png) no-repeat center left;
+	background-size: 80px 50px;
+}
+div.satellite div,ip {
+	font-size: 20px;
+}
+div.satellite div.status {
+	font-size: 14px;
+	line-height: 20px;
+	margin-left: 1px;
+}
+div.satellite div.latency {
+	font-size: 14px;
+	line-height: 20px;
+	margin-left: 1px;
+}
+div.satellite div.satellite-float {
+	position: absolute;
+	width: 30px;
+	height: 30px;
+	top: 25px;
+	left: 25px;
+	background-position: center left;
+	background-repeat: no-repeat;
+	background-size: 30px 30px;
+	cursor: pointer;
+	opacity: 0;
+
+	transition: opacity 150ms;
+	-moz-transition: opacity 150ms;
+	-webkit-transition: opacity 150ms; 
+	-o-transition: opacity 150ms; 
+}
+div.satellite:hover div.satellite-float {
+	opacity: .75;
+}
+div.b-pause {
+	background-image: url(../images/blackPause.png);
+}
+div.b-start {
+	background-image: url(../images/blackStart.png);
 }
 div.task div.halo, div.class div.halo {
 	position: absolute;

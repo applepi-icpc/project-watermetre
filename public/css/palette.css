@@ -35,7 +35,7 @@ div.command {
 div.command:hover {
 	color: #b2f2ff;
 }
-#alert:hover, #alert.flash {
+#alert:hover, div.block.flash {
 	background-color: #03b2d5;
 	color: black;
 }
@@ -53,6 +53,18 @@ div.classTitle h3 span.selectAll {
 }
 div.classTitle span.selectIndicator {
 	color: #03b2d5;
+}
+div.satellite div,ip {
+	color: #1ab2ff;
+}
+div.satellite div.status {
+	color: #17e6bf;
+}
+div.satellite.paused div.status {
+	color: #fc9797;
+}
+div.satellite div.latency {
+	color: #f6efcb;
 }
 span.string {
 	color: #f6efcb;

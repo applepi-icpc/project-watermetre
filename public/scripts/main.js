@@ -112,6 +112,7 @@ $(function () {
 				$('.nano').nanoScroller();
 			});
 		});
+		$('#blkSatellites').parent().addClass('flash');
 	});
 
 	// Hide Satellites
@@ -129,6 +130,7 @@ $(function () {
 				$('.nano').nanoScroller();
 			});
 		});
+		$('#blkSatellites').parent().removeClass('flash');
 	});
 
 	// New Task

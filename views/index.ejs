@@ -51,12 +51,12 @@
 							</div>
 							<div class="command other" id="cmdDeselect">Deselect All</div>
 						</div>
-						<div class="command remove hidden" id="hideSatellites">Back To Tasks</div>
 						<div class="block">
 							Satellites
 							<span id="blkSatellites">N/A</span>
 						</div>
 						<div class="command other" id="viewSatellites">View details</div>
+						<div class="command remove hidden" id="hideSatellites">Back To Tasks</div>
 						<div class="block">
 							Milliseconds after retrying
 							<span id="blkRetryTime"><%= retryInterval %></span>
@@ -178,10 +178,12 @@
 		<!-- Models -->
 		<script type="text/javascript" src="/scripts/models/task.js"></script>
 		<script type="text/javascript" src="/scripts/models/class.js"></script>
+		<script type="text/javascript" src="/scripts/models/satellite.js"></script>
 
 		<!-- Views -->
 		<script type="text/javascript" src="/scripts/views/taskView.js"></script>
 		<script type="text/javascript" src="/scripts/views/classView.js"></script>
+		<script type="text/javascript" src="/scripts/views/satelliteView.js"></script>
 		<script type="text/javascript" src="/scripts/views/alert.js"></script>
 		<script type="text/javascript" src="/scripts/views/stat.js"></script>
 

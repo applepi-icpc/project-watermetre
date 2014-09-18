@@ -1,14 +1,14 @@
 var app = app || {};
 
 var updateSatelliteInterval = 5000;
-var height = '60px';
+var sateRowHeight = '60px';
 
 var animationDuration = 500; // milliseconds
 
 var SatelliteView = Backbone.View.extend({
 	tagName: 'div',
 	className: 'satellite',
-	template: _.template($('#satellite-template').html());
+	template: _.template($('#satellite-template').html()),
 
 	events: {
 		'click div.b-start': 'start',
@@ -31,12 +31,13 @@ var SatelliteView = Backbone.View.extend({
 		this.$el.html(this.template({
 			ip: satellite.get('ip'),
 			status: satellite.get('paused') ? 'Paused' : 'Running',
+			paused: satellite.get('paused'),
 			latency: lat
 		}));
 		if (satellite.get('paused')) {
 			this.$el.addClass('paused');
 		} else {
-			this.$el.removeClass('succeeded');
+			this.$el.removeClass('paused');
 		}
 		return this;
 	},
@@ -49,7 +50,7 @@ var SatelliteView = Backbone.View.extend({
 		$list.append(this.$el);
 		this.$el.animate({
 			opacity: '1',
-			height: rowHeight
+			height: sateRowHeight
 		}, animationDuration, function () {
 			$('.nano').nanoScroller();
 		});
