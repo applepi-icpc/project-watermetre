@@ -22,6 +22,7 @@ function Worker(worker) {
 	this.ubound = worker.ubound;
 	this.launched = false;
 	this.running = false;
+	this.starting = false;
 	this.timeoutId = null;
 
 	// Reference to task
@@ -108,6 +109,12 @@ Worker.prototype.start = function start (rep) {
 		console.log('[START] ' + self.user_id + ' has already bugun.');
 		return;
 	}
+	if (self.starting) {
+		console.log('[START] ' + self.user_id + 'is being started by other functions.');
+		return;
+	}
+
+	self.starting = true;
 
 	// If login failed, change tasks' status to paused.
 	User.login(self.user_id, self.password, function(err, statusCode, user) {
@@ -119,7 +126,7 @@ Worker.prototype.start = function start (rep) {
 		if (statusCode == 500) { // Internal Server Error
 			++stat.errors;
 			stat.last_error = 'Failed to login (Internal Server Error).';
-			setTimeout(function () { self.start(true); }, retryLoginTime);
+			setTimeout(function () { self.starting = false; self.start(true); }, retryLoginTime);
 		} else if (statusCode == 403) { // Wrong user ID || Password
 			++stat.errors;
 			stat.last_error = 'Wrong user ID or password.';
@@ -138,7 +145,7 @@ Worker.prototype.start = function start (rep) {
 				response.on('end', function() {
 					if (self.running || !self.launched) return;
 					self.running = true;
-					self.timeoutId = setTimeout(function() { self.doWork(); }, settings.retryInterval);
+					self.timeoutId = setTimeout(function() { self.starting = false; self.doWork(); }, settings.retryInterval);
 				});
 			});
 			reqPage.on('socket', function (socket) {
@@ -150,7 +157,7 @@ Worker.prototype.start = function start (rep) {
 			reqPage.on('error', function (err) {
 				++stat.errors;
 				stat.last_error = 'Failed to fetch supply page (Internal Server Error).'
-				setTimeout(function () { self.start(true); }, retryLoginTime);
+				setTimeout(function () { self.starting = false; self.start(true); }, retryLoginTime);
 			});
 			reqPage.end();
 		}
