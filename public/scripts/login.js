@@ -27,6 +27,7 @@ $(function() {
 					} else {
 						$('div.superuser').show();
 					}
+					$('div.hidden').hide();
 
 					app.loadTask();
 					app.loginEffect();
