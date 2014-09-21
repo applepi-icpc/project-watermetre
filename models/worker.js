@@ -92,6 +92,13 @@ Worker.prototype.doWork = function doWork () {
 };
 Worker.prototype.start = function start (rep) {
 	var self = this;
+
+	if (self.starting) {
+		console.log('[START] ' + self.user_id + ' is being started by other functions.');
+		return;
+	}
+
+	self.starting = true;
 	self.consecutiveError = 0;
 
 	// For debug
@@ -99,22 +106,16 @@ Worker.prototype.start = function start (rep) {
 
 	if (rep) {
 		if (!self.launched) {
-			console.log('[START REP] ' + self.user_id + ' has suspended.');
+			console.log('[START REP] ' + self.user_id + ' has been suspended.');
 			return;
 		}
 	} else {
 		self.launched = true;
 	}
 	if (self.running) {
-		console.log('[START] ' + self.user_id + ' has already bugun.');
+		console.log('[START] ' + self.user_id + ' has already begun.');
 		return;
 	}
-	if (self.starting) {
-		console.log('[START] ' + self.user_id + 'is being started by other functions.');
-		return;
-	}
-
-	self.starting = true;
 
 	// If login failed, change tasks' status to paused.
 	User.login(self.user_id, self.password, function(err, statusCode, user) {
@@ -126,7 +127,8 @@ Worker.prototype.start = function start (rep) {
 		if (statusCode == 500) { // Internal Server Error
 			++stat.errors;
 			stat.last_error = 'Failed to login (Internal Server Error).';
-			setTimeout(function () { self.starting = false; self.start(true); }, retryLoginTime);
+			self.starting = false;
+			setTimeout(function () { self.start(true); }, retryLoginTime);
 		} else if (statusCode == 403) { // Wrong user ID || Password
 			++stat.errors;
 			stat.last_error = 'Wrong user ID or password.';
@@ -145,7 +147,8 @@ Worker.prototype.start = function start (rep) {
 				response.on('end', function() {
 					if (self.running || !self.launched) return;
 					self.running = true;
-					self.timeoutId = setTimeout(function() { self.starting = false; self.doWork(); }, settings.retryInterval);
+					self.starting = false;
+					self.timeoutId = setTimeout(function() { self.doWork(); }, settings.retryInterval);
 				});
 			});
 			reqPage.on('socket', function (socket) {
@@ -157,7 +160,8 @@ Worker.prototype.start = function start (rep) {
 			reqPage.on('error', function (err) {
 				++stat.errors;
 				stat.last_error = 'Failed to fetch supply page (Internal Server Error).'
-				setTimeout(function () { self.starting = false; self.start(true); }, retryLoginTime);
+				self.starting = false;
+				setTimeout(function () { self.start(true); }, retryLoginTime);
 			});
 			reqPage.end();
 		}
@@ -168,4 +172,5 @@ Worker.prototype.stop = function stop () {
 	this.timeoutId = null;
 	this.running = false;
 	this.launched = false;
+	this.starting = false;
 }
